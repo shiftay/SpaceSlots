@@ -1,0 +1,1 @@
+Use "overlay" transparency mode for "experience_bar_anim2.png"
