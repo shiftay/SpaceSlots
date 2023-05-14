@@ -28,12 +28,11 @@ public class Shop : MonoBehaviour
 
         if(currentSelected == clickedIndex) {
             // Selected the same one.
-            rm.additionalcoins = COINS[clickedIndex];
+            rm.TargetCoins = rm.currentData.coinAmount + COINS[clickedIndex];
+            rm.InitialCoins = rm.currentData.coinAmount;
             CloseShop();
             rm.coin.SetTrigger("Shake");
-            rm.SetAddingMoney();
-
-
+            rm.AddingMoney = true;
 
         } else  {
             shopButtons[clickedIndex].image.sprite = highlight;

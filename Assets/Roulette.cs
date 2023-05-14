@@ -49,8 +49,11 @@ public class Roulette : MonoBehaviour
     public void Spin() {
         for(int i = 0; i < area_parent.childCount; i++){
             currentItem = area_parent.GetChild(i);
-            if(!currentItem.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Default"))
+            if(!currentItem.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Default")){
                 currentItem.GetComponent<Animator>().SetTrigger("Default");
+                Debug.Log("Inside Spin on Roulette");
+            }
+               
             // currentItem.GetComponent<Animator>().enabled = false;
         }
     }
@@ -62,6 +65,8 @@ public class Roulette : MonoBehaviour
 
         currentItem = area_parent.GetChild(childIndex);
 
+        Debug.LogWarning("Run Animate??? " + index + " , " + childIndex);
+        
 
 
 
@@ -85,7 +90,8 @@ public class Roulette : MonoBehaviour
             currentChoice = Randomizer.BasicRoll();
             currentItem = area_parent.GetChild(i);
             currentItem.GetComponent<Image>().sprite = potentialSprites[currentChoice];
-            currentItem.GetComponent<Animator>().SetTrigger(currentChoice.ToString());
+            // currentItem.GetComponent<Animator>().SetTrigger("Default");
+            // Debug.Log("Inside UpdateAll");
             currentItem.GetChild(0).gameObject.SetActive(currentChoice == EXPERIENCE);
         }
     }
