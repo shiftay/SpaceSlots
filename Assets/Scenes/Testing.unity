@@ -24070,7 +24070,6 @@ MonoBehaviour:
   writeNewFile: 1
   AddingMoney: 0
   doingBonusSpins: 0
-  additionalcoins: 0
   coinTimer: 0
   coin: {fileID: 1553326834}
   fakeSpin: {fileID: 1811041209}
@@ -24088,6 +24087,8 @@ MonoBehaviour:
   winTypeText: {fileID: 1220264039}
   winAmountText: {fileID: 438470265}
   xpAnim: {fileID: 264345204}
+  TargetCoins: 0
+  InitialCoins: 0
 --- !u!1 &1834523999
 GameObject:
   m_ObjectHideFlags: 0
