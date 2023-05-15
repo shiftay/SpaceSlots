@@ -1227,7 +1227,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 110684390}
   m_Enabled: 1
-  m_Alpha: 0
+  m_Alpha: 0.97
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
@@ -6982,7 +6982,7 @@ MonoBehaviour:
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 0
-  m_FillAmount: 1
+  m_FillAmount: 0
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
@@ -7893,7 +7893,16 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 819ceeeb0d9c76041915cee96eeec81b, type: 3}
   - {fileID: 21300000, guid: 189077e2da777bf4384e5f916314fea1, type: 3}
   - {fileID: 21300000, guid: 18a4f044dce5f1a40a07cb6a3a51719e, type: 3}
-  experienceSprites: []
+  experienceSprites:
+  - {fileID: 21300000, guid: 573358a540fd2cd40899973e7a273a8c, type: 3}
+  - {fileID: 21300000, guid: e11d998b9978cbc4b91d0ef65df77eb4, type: 3}
+  - {fileID: 21300000, guid: 5d2eb540ab01e0c4ea42f3e8da8e4de1, type: 3}
+  - {fileID: 21300000, guid: ff6215fea2717a0479e1ade4842bc132, type: 3}
+  - {fileID: 21300000, guid: 3acf9b41bdd859b42ba954c1810f649c, type: 3}
+  - {fileID: 21300000, guid: e3dbb9bfe969da54d92fd1d3f39567f8, type: 3}
+  - {fileID: 21300000, guid: 429c160473ed99f419297d8838643b40, type: 3}
+  - {fileID: 21300000, guid: dd401ee83757b394390b3684244e72cd, type: 3}
+  - {fileID: 21300000, guid: d6e3e6ef2833b08429bf8348ed799402, type: 3}
   toggleRoulette: 0
   speed: 0
   rm: {fileID: 0}
@@ -10025,7 +10034,16 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 819ceeeb0d9c76041915cee96eeec81b, type: 3}
   - {fileID: 21300000, guid: 189077e2da777bf4384e5f916314fea1, type: 3}
   - {fileID: 21300000, guid: 18a4f044dce5f1a40a07cb6a3a51719e, type: 3}
-  experienceSprites: []
+  experienceSprites:
+  - {fileID: 21300000, guid: 573358a540fd2cd40899973e7a273a8c, type: 3}
+  - {fileID: 21300000, guid: e11d998b9978cbc4b91d0ef65df77eb4, type: 3}
+  - {fileID: 21300000, guid: 5d2eb540ab01e0c4ea42f3e8da8e4de1, type: 3}
+  - {fileID: 21300000, guid: ff6215fea2717a0479e1ade4842bc132, type: 3}
+  - {fileID: 21300000, guid: 3acf9b41bdd859b42ba954c1810f649c, type: 3}
+  - {fileID: 21300000, guid: e3dbb9bfe969da54d92fd1d3f39567f8, type: 3}
+  - {fileID: 21300000, guid: 429c160473ed99f419297d8838643b40, type: 3}
+  - {fileID: 21300000, guid: dd401ee83757b394390b3684244e72cd, type: 3}
+  - {fileID: 21300000, guid: d6e3e6ef2833b08429bf8348ed799402, type: 3}
   toggleRoulette: 0
   speed: 0
   rm: {fileID: 0}
@@ -14311,7 +14329,16 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 819ceeeb0d9c76041915cee96eeec81b, type: 3}
   - {fileID: 21300000, guid: 189077e2da777bf4384e5f916314fea1, type: 3}
   - {fileID: 21300000, guid: 18a4f044dce5f1a40a07cb6a3a51719e, type: 3}
-  experienceSprites: []
+  experienceSprites:
+  - {fileID: 21300000, guid: 573358a540fd2cd40899973e7a273a8c, type: 3}
+  - {fileID: 21300000, guid: e11d998b9978cbc4b91d0ef65df77eb4, type: 3}
+  - {fileID: 21300000, guid: 5d2eb540ab01e0c4ea42f3e8da8e4de1, type: 3}
+  - {fileID: 21300000, guid: ff6215fea2717a0479e1ade4842bc132, type: 3}
+  - {fileID: 21300000, guid: 3acf9b41bdd859b42ba954c1810f649c, type: 3}
+  - {fileID: 21300000, guid: e3dbb9bfe969da54d92fd1d3f39567f8, type: 3}
+  - {fileID: 21300000, guid: 429c160473ed99f419297d8838643b40, type: 3}
+  - {fileID: 21300000, guid: dd401ee83757b394390b3684244e72cd, type: 3}
+  - {fileID: 21300000, guid: d6e3e6ef2833b08429bf8348ed799402, type: 3}
   toggleRoulette: 0
   speed: 0
   rm: {fileID: 0}
@@ -18134,7 +18161,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 99
+  m_text: 999
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 62eee24b4263ca243a82690381cb49d0, type: 2}
   m_sharedMaterial: {fileID: -3839371003077821792, guid: 62eee24b4263ca243a82690381cb49d0, type: 2}
@@ -18161,8 +18188,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 44
-  m_fontSizeBase: 44
+  m_fontSize: 33
+  m_fontSizeBase: 33
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -20007,7 +20034,16 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 819ceeeb0d9c76041915cee96eeec81b, type: 3}
   - {fileID: 21300000, guid: 189077e2da777bf4384e5f916314fea1, type: 3}
   - {fileID: 21300000, guid: 18a4f044dce5f1a40a07cb6a3a51719e, type: 3}
-  experienceSprites: []
+  experienceSprites:
+  - {fileID: 21300000, guid: 573358a540fd2cd40899973e7a273a8c, type: 3}
+  - {fileID: 21300000, guid: e11d998b9978cbc4b91d0ef65df77eb4, type: 3}
+  - {fileID: 21300000, guid: 5d2eb540ab01e0c4ea42f3e8da8e4de1, type: 3}
+  - {fileID: 21300000, guid: ff6215fea2717a0479e1ade4842bc132, type: 3}
+  - {fileID: 21300000, guid: 3acf9b41bdd859b42ba954c1810f649c, type: 3}
+  - {fileID: 21300000, guid: e3dbb9bfe969da54d92fd1d3f39567f8, type: 3}
+  - {fileID: 21300000, guid: 429c160473ed99f419297d8838643b40, type: 3}
+  - {fileID: 21300000, guid: dd401ee83757b394390b3684244e72cd, type: 3}
+  - {fileID: 21300000, guid: d6e3e6ef2833b08429bf8348ed799402, type: 3}
   toggleRoulette: 0
   speed: 0
   rm: {fileID: 0}
@@ -21840,7 +21876,16 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 819ceeeb0d9c76041915cee96eeec81b, type: 3}
   - {fileID: 21300000, guid: 189077e2da777bf4384e5f916314fea1, type: 3}
   - {fileID: 21300000, guid: 18a4f044dce5f1a40a07cb6a3a51719e, type: 3}
-  experienceSprites: []
+  experienceSprites:
+  - {fileID: 21300000, guid: 573358a540fd2cd40899973e7a273a8c, type: 3}
+  - {fileID: 21300000, guid: e11d998b9978cbc4b91d0ef65df77eb4, type: 3}
+  - {fileID: 21300000, guid: 5d2eb540ab01e0c4ea42f3e8da8e4de1, type: 3}
+  - {fileID: 21300000, guid: ff6215fea2717a0479e1ade4842bc132, type: 3}
+  - {fileID: 21300000, guid: 3acf9b41bdd859b42ba954c1810f649c, type: 3}
+  - {fileID: 21300000, guid: e3dbb9bfe969da54d92fd1d3f39567f8, type: 3}
+  - {fileID: 21300000, guid: 429c160473ed99f419297d8838643b40, type: 3}
+  - {fileID: 21300000, guid: dd401ee83757b394390b3684244e72cd, type: 3}
+  - {fileID: 21300000, guid: d6e3e6ef2833b08429bf8348ed799402, type: 3}
   toggleRoulette: 0
   speed: 0
   rm: {fileID: 0}

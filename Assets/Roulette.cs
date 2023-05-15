@@ -66,22 +66,10 @@ public class Roulette : MonoBehaviour
         currentItem = area_parent.GetChild(childIndex);
 
         Debug.LogWarning("Run Animate??? " + index + " , " + childIndex);
-        
-
-
 
         currentItem.GetComponent<Animator>().SetTrigger(potentialSprites.FindIndex(n => n == currentItem.GetComponent<Image>().sprite).ToString());
         
         // currentItem.GetComponent<Animator>().enabled = true;
-    }
-
-    public void VerticalWin() {
-        for(int i = 2; i < 7; i++) {
-            currentItem = area_parent.GetChild(i);
-            
-            currentItem.GetComponent<Animator>().SetTrigger(potentialSprites.FindIndex(n => n == currentItem.GetComponent<Image>().sprite).ToString());
-            // currentItem.GetComponent<Animator>().enabled = true;
-        }
     }
 
     private Transform currentItem;
@@ -121,12 +109,14 @@ public class Roulette : MonoBehaviour
         return retVal;
     }
 
-    public class ExperienceStar {
-        public int index, value;
 
-        public ExperienceStar(int index, int value) {
-            this.index = index;
-            this.value = value;
-        }
+}
+
+public class ExperienceStar {
+    public int index, value;
+
+    public ExperienceStar(int index, int value) {
+        this.index = index;
+        this.value = value;
     }
 }

@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 public class RouletteManager : MonoBehaviour
 {
+    private const int EXPPERLEVEL = 10;
     private const int WILDCARD = 8;
     public List<Roulette> roulettes;
     public Loader loader;
@@ -61,73 +62,63 @@ public class RouletteManager : MonoBehaviour
     private float timeElapsed = 0;
     private float duration = 2;
 
+/*
+    Bonus Spins
+
+
+    do bonus Spins
+
+
+*/
+
 
     private void FixedUpdate() {
-        if(isRunning) {
-            timer += Time.fixedDeltaTime;
-            // Stops the fake Spin animatiion
-            if(timer > 1f && !fakeSpin.GetCurrentAnimatorStateInfo(0).IsName("RouletteComplete")) {
-                fakeSpin.SetTrigger("Stop");
-            } 
-            // Slows down the Roulette spins
-            if(timer > 2f && !slowDown) {
-                slowDown = true;
-                ToggleRoulettes(true, false, 0.25f);
+
+
+        if(doingBonusSpins) {
+            RunSpins();
+
+            if(timer > maxTIME) {
+                spinAmount -= 1;
+                timer = 0;
+                SetSpinsVal();
+                ToggleRoulettes(false);
+                isRunning = slowDown = false;
+
+                RunResults();
+                if(Won) {
+                    // Animates the Winning tiles
+                    // Tells the Column which row is part of the winning 
+                    foreach(RouletteWin win in rWin) {
+                        foreach(Coordinates c in win.WinningCoords) {
+                            roulettes[c.Column].RunAnimation(c.Row);
+                        }
+                    }
+
+                    ShowWin(rWin);
+
+                    CheckSpinAmt();
+                } else {
+                    // If bonus spins are left spin again.
+                    CheckSpinAmt();
+                }
+
             }
+        }
+
+
+
+
+
+        if(isRunning) {
+            RunSpins();
 
             // Stops the Roulettes to begin looking for a win.
             if(timer > maxTIME) {
                 ToggleRoulettes(false);
                 isRunning = slowDown = false;
 
-                // Gathers the results column by column
-                Results = new List<List<int>>();
-                roulettes.ForEach(n => Results.Add(n.Results()));
-
-                // TODO Check for Experience, Bonus Spins
-
-
-                // *** DEBUG ***
-                // Prints out the values of the roulettes
-                if(printValues) {
-                    string temp = "";
-                    for(int i = 0; i < Results.Count; i++) {
-                        
-                        Results[i].ForEach(n => temp += " " + n + " ");
-                        temp += "\n";
-                    }
-                    Debug.Log(temp);
-                }
-
-                rWin = new List<RouletteWin>();
-                
-                for(int i = 0; i < Results.Count; i++) {
-                    rWin.Add(VerticalWin(Results, i));
-                    rWin.Add(HorizontalWin(Results, i));
-                }
-
-                // Rejects all null wins
-                rWin.RemoveAll(n => n.wintype == WINTYPE.NULL);
-
-                // Attempts to fuse wins for the difficult win types, Square, L, Cross, etc...
-                if(rWin.Count > 2) {
-                    rWin = CheckForSquare(rWin);
-                    // rWin = CheckForCross(rWin);
-                    rWin = CheckForT(rWin);
-                    // rWin = CheckForL(rWin);
-                }
-        
-                // Checks Diagonal
-                rWin.AddRange(DiagonalWin(Results));
-                
-                rWin.ForEach(n => {
-                    if(n.Won) {
-                        Debug.LogError("Winner @ " + n.indexOfWin + " " + n.wintype);
-                        Won = true;
-                    } 
-                });
-
-                isRunning = false;
+                RunResults();
 
                 if(Won) {
                     // Animates the Winning tiles
@@ -170,6 +161,100 @@ public class RouletteManager : MonoBehaviour
                 SetCoinValue();
             }
         }
+    }
+
+
+    public void CheckSpinAmt() {
+        if(spinAmount > 0 ) Invoke("Spin", 1.5f);
+        else {
+            doingBonusSpins = false;
+            start.interactable = true;
+
+            xpAnim.SetTrigger("FadeOut");
+            bonusAnimator.SetTrigger("Close");
+        }
+    }
+
+    public void RunSpins() {
+        timer += Time.fixedDeltaTime;
+        // Stops the fake Spin animatiion
+        if(timer > 1f && !fakeSpin.GetCurrentAnimatorStateInfo(0).IsName("RouletteComplete")) {
+            fakeSpin.SetTrigger("Stop");
+        } 
+        // Slows down the Roulette spins
+        if(timer > 2f && !slowDown) {
+            slowDown = true;
+            ToggleRoulettes(true, false, 0.25f);
+        }
+    }
+
+
+    public void RunResults() {
+        // Gathers the results column by column
+        Results = new List<List<int>>();
+        roulettes.ForEach(n => Results.Add(n.Results()));
+
+        // TODO Check for Experience, Bonus Spins
+
+
+        // *** DEBUG ***
+        // Prints out the values of the roulettes
+        if(printValues) {
+            string temp = "";
+            for(int i = 0; i < Results.Count; i++) {
+                
+                Results[i].ForEach(n => temp += " " + n + " ");
+                temp += "\n";
+            }
+            Debug.Log(temp);
+        }
+
+        rWin = new List<RouletteWin>();
+        
+        for(int i = 0; i < Results.Count; i++) {
+            rWin.Add(VerticalWin(Results, i));
+            rWin.Add(HorizontalWin(Results, i));
+        }
+
+        // Rejects all null wins
+        rWin.RemoveAll(n => n.wintype == WINTYPE.NULL);
+
+        // Attempts to fuse wins for the difficult win types, Square, L, Cross, etc...
+        if(rWin.Count > 2) {
+            rWin = CheckForSquare(rWin);
+            // rWin = CheckForCross(rWin);
+            rWin = CheckForT(rWin);
+            // rWin = CheckForL(rWin);
+        }
+
+        // TODO: Needs to grab all Experience 
+        if(doingBonusSpins) {
+            List<ExperienceStar> exp = new List<ExperienceStar>();
+            roulettes.ForEach(n => {
+                exp.AddRange(n.Experience());
+            });
+
+            if(exp.Count > 0) {
+                // Add Exp up and add it to the bar
+                exp.ForEach(n => {
+                    currentXP += n.value;
+                    SetXP();
+                });
+            }
+        }
+
+
+        // Checks Diagonal
+        rWin.AddRange(DiagonalWin(Results));
+        
+        rWin.ForEach(n => {
+            if(n.Won) {
+                Debug.LogError("Winner @ " + n.indexOfWin + " " + n.wintype);
+                Won = true;
+            } 
+        });
+
+        isRunning = false;
     }
 
 
@@ -496,6 +581,7 @@ public class RouletteManager : MonoBehaviour
     private const float MAXBET = 10.00f;
     private const float MINBET = 2.50f;
     private int level;
+    private int currentXP;
     private int spinAmount;
     public Animator winAnimator, bonusAnimator;
     public Animator winPopUp;
@@ -503,20 +589,20 @@ public class RouletteManager : MonoBehaviour
 
     // Resets variables, and pays the money. If it can't pay the money, it won't spin.
     public void Spin() {
-        if(currentData.coinAmount - currentData.currentBet < 0) return;
-
         if(!doingBonusSpins) {
+            if(currentData.coinAmount - currentData.currentBet < 0) return;
+
             currentData.coinAmount -= currentData.currentBet;
             SetCoinValue();
         }
 
-        timer = 0.0f;
-        timeElapsed = 0;
+
+        timeElapsed = timer = 0.0f;
         start.interactable = false;
         Won = false;
         ToggleRoulettes(true, true);
-        isRunning = true;
         fakeSpin.SetTrigger("Start");
+        isRunning = true;
     }
 
     
@@ -540,6 +626,23 @@ public class RouletteManager : MonoBehaviour
         SetBetValue();
     }
 
+    public void SetXP() {
+
+        if(currentXP >= level * EXPPERLEVEL) {
+            currentXP -= (level * EXPPERLEVEL);
+            
+            level++;
+            
+            xpAnim.SetTrigger("Shake");
+            //TODO: Run Level Up Animation
+            //      Give extra spins      
+            //      Increase multiplier on wins
+        }
+
+        xpSlider.fillAmount = (float)currentXP / (float)(level * EXPPERLEVEL);
+        expLevel.text = level.ToString();
+    }
+
     public Animator xpAnim;
 
     public void SetSpins(int spins) {
@@ -550,11 +653,13 @@ public class RouletteManager : MonoBehaviour
         xpAnim.SetTrigger("FadeIn");
         bonusAnimator.SetTrigger("Open");
         level = 1;
+        currentXP = 0;
         expLevel.text = level.ToString();
+        xpSlider.fillAmount = currentXP;
         doingBonusSpins = true;
-        
-        // Initiate Bonus Spins
-        // Fade in Win counter on win
+        Won = false;
+        ToggleRoulettes(true, true);
+        fakeSpin.SetTrigger("Start");
     }
 
     private void SetSpinsVal() {
@@ -629,8 +734,6 @@ public class RouletteManager : MonoBehaviour
         loader.SaveFile(currentData);
     }
 #endregion
-
-
 
 #region Win Class / Enums
     [System.Serializable]
