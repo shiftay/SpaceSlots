@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,11 +9,14 @@ public class RouletteManager : MonoBehaviour
 {
     private const int EXPPERLEVEL = 10;
     private const int WILDCARD = 8;
+    private const float MAXTIME = 2.25f;
     public List<Roulette> roulettes;
     public Loader loader;
     public GameData currentData;
     public Shop shop;
     public BonusSpins bonusSpins;
+    public WinLine winLine;
+    public Animator canvasAnim;
 
     private void ToggleRoulettes(bool toggle, bool setAnims = false, float speed = 0f) {
         roulettes.ForEach(n => {
@@ -29,7 +33,7 @@ public class RouletteManager : MonoBehaviour
     List<List<int>> Results = new List<List<int>>();
 
     // DEBUG VALUES
-    public float maxTIME;
+   
     public bool continuous;
     private bool Won = false;
     public bool printValues;
@@ -78,7 +82,7 @@ public class RouletteManager : MonoBehaviour
         if(doingBonusSpins) {
             RunSpins();
 
-            if(timer > maxTIME) {
+            if(timer > MAXTIME) {
                 spinAmount -= 1;
                 timer = 0;
                 SetSpinsVal();
@@ -111,10 +115,11 @@ public class RouletteManager : MonoBehaviour
 
 
         if(isRunning) {
-            RunSpins();
-
+            // RunSpins();
+            timer += Time.fixedDeltaTime;
             // Stops the Roulettes to begin looking for a win.
-            if(timer > maxTIME) {
+            if(timer > MAXTIME ) {
+                fakeSpin.SetTrigger("Stop");
                 ToggleRoulettes(false);
                 isRunning = slowDown = false;
 
@@ -123,13 +128,13 @@ public class RouletteManager : MonoBehaviour
                 if(Won) {
                     // Animates the Winning tiles
                     // Tells the Column which row is part of the winning 
-                    foreach(RouletteWin win in rWin) {
-                        foreach(Coordinates c in win.WinningCoords) {
-                            roulettes[c.Column].RunAnimation(c.Row);
-                        }
-                    }
+                    rWin[0].WinningCoords.ForEach(n => {
+                        roulettes[n.Column].RunAnimation(n.Row);
+                    });
+            
 
                     ShowWin(rWin);
+                    winLine.TurnOn(rWin[0].winId);
                     start.interactable = true;
                 } else {
                     // *** DEBUG MODE *** 
@@ -152,7 +157,7 @@ public class RouletteManager : MonoBehaviour
         if(AddingMoney) {
             if(currentData.coinAmount == TargetCoins) {
                 coin.SetTrigger("Complete");
-                
+                timeElapsed = 0;
                 AddingMoney = false;
             } else {
                 // Option to use Mathf.SmoothStep
@@ -211,20 +216,12 @@ public class RouletteManager : MonoBehaviour
 
         rWin = new List<RouletteWin>();
         
-        for(int i = 0; i < Results.Count; i++) {
-            rWin.Add(VerticalWin(Results, i));
-            rWin.Add(HorizontalWin(Results, i));
-        }
+        PullCoordinates();
+        CheckForWin();
 
-        // Rejects all null wins
-        rWin.RemoveAll(n => n.wintype == WINTYPE.NULL);
 
-        // Attempts to fuse wins for the difficult win types, Square, L, Cross, etc...
         if(rWin.Count > 2) {
-            rWin = CheckForSquare(rWin);
-            // rWin = CheckForCross(rWin);
-            rWin = CheckForT(rWin);
-            // rWin = CheckForL(rWin);
+            Debug.LogError("You won more than once.");
         }
 
         // TODO: Needs to grab all Experience 
@@ -245,11 +242,11 @@ public class RouletteManager : MonoBehaviour
 
 
         // Checks Diagonal
-        rWin.AddRange(DiagonalWin(Results));
+        // rWin.AddRange(DiagonalWin(Results));
         
         rWin.ForEach(n => {
             if(n.Won) {
-                Debug.LogError("Winner @ " + n.indexOfWin + " " + n.wintype);
+                // Debug.LogError("Winner @ " + n.indexOfWin + " " + n.wintype);
                 Won = true;
             } 
         });
@@ -261,293 +258,62 @@ public class RouletteManager : MonoBehaviour
 
 #region Look for Wins
 
-    // private List<RouletteWin> CheckForCross(List<RouletteWin> results)
-    // {
-    //     // 2 2
-    //     List<RouletteWin> checkVals = new List<RouletteWin>();
+    List<Coordinates> coordinates = new List<Coordinates>();
+    private void PullCoordinates() {
+        coordinates.Clear();
 
-    //     for(int i = 0; i < results.Count; i++) {
-    //         if(results[i].wintype == WINTYPE.HORIZONTAL && results[i].indexOfWin == 2) {
-    //             checkVals.Add(results[i]);
-    //         } else if(results[i].wintype == WINTYPE.VERTICAL && results[i].indexOfWin == 2) {
-    //             checkVals.Add(results[i]);
-    //         }
-    //     }
+        for(int i = 0; i < roulettes.Count; i++) {
+            List<int> temp = roulettes[i].Results();
 
-    //     if(checkVals.Count == 2) {
-    //         int checkSum = checkVals[0].checkSum;
-    //         checkVals.ForEach(n => results.Remove(n));
-    //         results.Add(new RouletteWin(WINTYPE.CROSS, 2, checkSum));
-    //     }
-
-    //     return results;
-    // }
-
-    private List<RouletteWin> CheckForSquare(List<RouletteWin> results)
-    {
-        List<RouletteWin> checkVals = new List<RouletteWin>();
-        for(int i = 0; i < results.Count; i++) {
-            if(results[i].wintype == WINTYPE.HORIZONTAL && results[i].indexOfWin == 0) {
-                checkVals.Add(results[i]);
-            } else if(results[i].wintype == WINTYPE.VERTICAL && results[i].indexOfWin == 0) {
-                checkVals.Add(results[i]);
-            } else if(results[i].wintype == WINTYPE.HORIZONTAL && results[i].indexOfWin == 4) {
-                checkVals.Add(results[i]);
-            } else if(results[i].wintype == WINTYPE.VERTICAL && results[i].indexOfWin == 4) {
-                checkVals.Add(results[i]);
+            for(int j = 0; j < temp.Count; j++) {
+                coordinates.Add(new Coordinates(j, i, temp[j]));
             }
         }
-
-        // Adds all the winning coordinates and returns back a singular Square win.
-        if(checkVals.Count == 4) {
-            int checkSum = checkVals[0].checkSum;
-            List<Coordinates> Square = new List<Coordinates>();
-
-            checkVals.ForEach(n=> Square.AddRange(n.WinningCoords));
-            checkVals.ForEach(n => results.Remove(n));
-
-            results.Add(new RouletteWin(WINTYPE.SQUARE, 0, checkSum, Square));
-        }
-
-        return results;
-    }
-
-    private List<RouletteWin> CheckForT(List<RouletteWin> results)
-    {
-        List<RouletteWin> checkVals = new List<RouletteWin>();
-
-        checkVals = T_Indices(results, 0, 2);
-
-        // Adds all the winning coordinates and returns back a singular T win.
-        if(checkVals.Count == 2) {
-            int checkSum = checkVals[0].checkSum;
-            List<Coordinates> T = new List<Coordinates>();
-            checkVals.ForEach(n=> T.AddRange(n.WinningCoords));
-
-            checkVals.ForEach(n => results.Remove(n));
-
-            results.Add(new RouletteWin(WINTYPE.T, 0, checkSum, T));
-        }
-        checkVals.Clear();
-
-        checkVals = T_Indices(results, 4, 2);
-        // Adds all the winning coordinates and returns back a singular T win.
-        if(checkVals.Count == 2) {
-            int checkSum = checkVals[0].checkSum;
-    
-            List<Coordinates> T = new List<Coordinates>();
-            checkVals.ForEach(n=> T.AddRange(n.WinningCoords));
-
-            checkVals.ForEach(n => results.Remove(n));
-
-            results.Add(new RouletteWin(WINTYPE.T_INVERTED, 4, checkSum, T));
-        }
-
-        return results;
     }
 
 
-    private List<RouletteWin> T_Indices(List<RouletteWin> results, int hori, int vert) {
-        List<RouletteWin> retVal = new List<RouletteWin>();
-        for(int i = 0; i < results.Count; i++) {
-            if(results[i].wintype == WINTYPE.HORIZONTAL && results[i].indexOfWin == 0) {
-                retVal.Add(results[i]);
-            } else if(results[i].wintype == WINTYPE.VERTICAL && results[i].indexOfWin == 2) {
-                retVal.Add(results[i]);
-            }
-        }
-
-        return retVal;
-    }
+    private void CheckForWin() {
+        List<WinDefinitions> defn = WinDefinitions.ReturnDefs();
 
 
-    // Checks against a specific Row, Makes sure to validate if they are all wildcards.
-    // Or if the first one is wildcard set what to actually look for.
-    private RouletteWin HorizontalWin(List<List<int>> Results, int index) {
-        RouletteWin retVal = new RouletteWin();
-
-        bool horizontalWin = true;
-        int checkSum = Results[0][index];
-
-        if(checkSum == WILDCARD) {
-            for(int i = 0; i < Results.Count; i++) {
-                if(Results[i][index] != WILDCARD) {
-                    checkSum = Results[i][index];
-                    break;
-                }
-            }
-            // Full Wildcard Win
-            if(checkSum == WILDCARD) {
-                retVal.Won = true;
-                retVal.wintype = WINTYPE.HORIZONTAL;
-                retVal.indexOfWin = index;
-                
-                retVal.checkSum = checkSum;
-                return retVal;
-            }
-        }
-
-
-        for(int i = 0; i < Results.Count; i++) {
+        defn.ForEach(n => {
+            int lookup = -1;
+            int comparison = -1;
+            bool setLookup = true;
+            bool winning = true;
             
-            if(Results[i][index] != checkSum && Results[i][index] != WILDCARD) {
-                horizontalWin = false;
-            }
-        }
-
-        if(horizontalWin) {
-            List<Coordinates> Winners = new List<Coordinates>();
-            retVal.Won = true;
-            retVal.wintype = WINTYPE.HORIZONTAL;
-            retVal.indexOfWin = index;
-
-            for(int i = 0; i < 5; i++)
-                Winners.Add(new Coordinates(index, i));
-            
-            retVal.WinningCoords = Winners;
-            retVal.checkSum = checkSum;
-            return retVal;
-        }
-
-        return retVal;
-    }
-
-    // Checks against a specific Column, Makes sure to validate if they are all wildcards.
-    // Or if the first one is wildcard set what to actually look for.
-    private RouletteWin VerticalWin(List<List<int>> Results, int index) {
-        RouletteWin retVal = new RouletteWin();
+            for(int i = 0; i < n.winningCoords.Count; i++) {
+                // Debug.Log(n.winningCoords[i].Column +", "+ n.winningCoords[i].Row + ", " + n.id);
+                comparison = coordinates.Find(x => x.Column == n.winningCoords[i].Column && x.Row == n.winningCoords[i].Row).Value;
 
 
-        bool verticalWin = true;
-        int checksum = Results[index][0];
-        // WildCard look for first non wildcard in the row.
-        if(Results[index][0] == WILDCARD) {
+                if(comparison != WILDCARD) {
+                    // Debug.Log(lookup + " == " + comparison);
 
-            for(int i = 0; i < Results.Count; i++) {
-                if(Results[index][i] != WILDCARD)  {
-                    checksum = Results[index][i];
-                    break;
-                }
-            }
-        }
-
-        for(int i = 0; i < Results.Count; i++) {
-            if(Results[index][i] != checksum && Results[index][i] != WILDCARD) {
-                verticalWin = false;
-            }
-        }
-
-        if(verticalWin) {
-            List<Coordinates> Winners = new List<Coordinates>();
-            retVal.Won = true;
-            retVal.wintype = WINTYPE.VERTICAL;
-            retVal.indexOfWin = index;
-            retVal.checkSum = checksum;
-
-            for(int i = 0; i < 5; i++)
-                Winners.Add(new Coordinates(i, index));
-            
-            retVal.WinningCoords = Winners;
-            return retVal;
-        }
-
-        return retVal;
-    }
-
-    private List<RouletteWin> DiagonalWin(List<List<int>> Results) {
-        List<RouletteWin> retVal = new List<RouletteWin>();
-
-        List<Coordinates> Winners = new List<Coordinates>();
-
-        int checkSum = Results[0][0];
-
-        bool diagonalWin = true;
-        if(checkSum == WILDCARD) {
-            for(int i = 0; i < Results.Count; i++) {
-                for(int j = 0; j < Results.Count; j++) {
-                    if(j == i) {
-                        if(Results[i][j] != WILDCARD) {
-                            checkSum = Results[i][j];
-                            break;
-                        } else {
-                            Winners.Add(new Coordinates(i,j));
-                        }
-                    }
-                }
-            }
-        }
-
-        if(checkSum == WILDCARD) {
-            retVal.Add(new RouletteWin(WINTYPE.DIAGONAL, 0, checkSum, Winners));
-        } else {
-            for(int i = 0; i < Results.Count; i++) {
-                for(int j = 0; j < Results.Count; j++) {
-                    if(j == i) {
-                        if(Results[i][j] != WILDCARD && Results[i][j] != checkSum)
-                            diagonalWin = false;
-                        else 
-                            Winners.Add(new Coordinates(i,j));
-                    } else
+                    if(setLookup) {
+                        lookup = comparison;  
+                        setLookup = false;
                         continue;
-                }
-            }
-
-            if(diagonalWin) {
-                retVal.Add(new RouletteWin(WINTYPE.DIAGONAL, 0, checkSum, Winners));
-            }
-        }
-
-
-        Winners.Clear();
-        checkSum = Results[0][Results.Count-1];
-        diagonalWin = true;
-        if(checkSum == WILDCARD) {
-            for(int i = 0; i < Results.Count; i++) {
-                for(int j = 0; j < Results.Count; j++) {
-                    if(j == (Results.Count-1) - i) {
-                        if(Results[i][j] != WILDCARD) {
-                            checkSum = Results[i][j];
-                            break;
-                        } else {
-
-                        }
                     }
-                }
-            }
-        }
 
-        if(checkSum == WILDCARD) {
-            retVal.Add(new RouletteWin(WINTYPE.DIAGONAL, 5, checkSum, Winners));
-        } else {
-            for(int i = 0; i < Results.Count; i++) {
-                for(int j = 0; j < Results.Count; j++) {
-                    if(j == (Results.Count-1) - i) {
-                        if(Results[i][j] != WILDCARD && Results[i][j] != checkSum)
-                            diagonalWin = false;
-                        else
-                            Winners.Add(new Coordinates(i,j));
-                    } else
-                        continue;
-                }
+                    if(comparison != lookup) {
+                        winning = false;
+                        break;
+                    }
+                } 
             }
 
-            if(diagonalWin) {
-                retVal.Add(new RouletteWin(WINTYPE.DIAGONAL, 5, checkSum, Winners));
+            if(winning) {
+                rWin.Add(new RouletteWin(n.id, lookup, n.WinMulti, n.winningCoords));
             }
-        }
+        });
 
-        if(retVal.Count == 2) {
-            // X WON
-            List<Coordinates> X = new List<Coordinates>();
-            retVal.ForEach(n=> X.AddRange(n.WinningCoords));
-
-            retVal.Clear();
-            retVal.Add(new RouletteWin(WINTYPE.X, 0, checkSum, X));
-        }
-
-
-        return retVal;
+        rWin = rWin.OrderByDescending(o=>o.winId).ToList();
+        
+        // Debug.Log(rWin.Sort((x, y) => x.winId.CompareTo(y.winId))[0].winId);
     }
+
+
 
     
 #endregion
@@ -596,7 +362,7 @@ public class RouletteManager : MonoBehaviour
             SetCoinValue();
         }
 
-
+        winLine.TurnOff();
         timeElapsed = timer = 0.0f;
         start.interactable = false;
         Won = false;
@@ -687,7 +453,7 @@ public class RouletteManager : MonoBehaviour
         if(win.Count > 2) {
             winTypeText.text = "MULTI WIN";
         } else {
-            winTypeText.text = win[0].wintype.ToString();
+            // winTypeText.text = win[0].wintype.ToString();
         }
 
         float amt = winAmount(win);
@@ -705,9 +471,8 @@ public class RouletteManager : MonoBehaviour
         float retVal = 0.0f;
 
         foreach(RouletteWin rw in win) {
-            Debug.Log(rw.checkSum + " " + rw.wintype.ToString());
             retVal += IconMultipliers.summary.Find(n => n.checkSum == rw.checkSum).multiplier 
-                    * TypeMultipliers.summary.Find(n => n.type == rw.wintype).multiplier 
+                    * rw.WinMulti
                     * currentData.currentBet;
         }
 
@@ -721,6 +486,15 @@ public class RouletteManager : MonoBehaviour
 
     public void OpenBonusSpins() {
         bonusSpins.Open(this);
+    }
+
+
+    public void ShowInfo() {
+        canvasAnim.SetTrigger("Info");
+    }
+
+    public void CloseInfo() {
+        canvasAnim.SetTrigger("Game");
     }
 
 #endregion
@@ -740,8 +514,8 @@ public class RouletteManager : MonoBehaviour
     public class RouletteWin {
         public bool Won;
         public int checkSum;
-        public WINTYPE wintype;
-        public int indexOfWin;
+        public int WinMulti;
+        public int winId;
         public List<Coordinates> WinningCoords;
         // Index of Win must have it's own definition, so as to cover which row or column, or starting diagonal.
 
@@ -749,18 +523,16 @@ public class RouletteManager : MonoBehaviour
         public RouletteWin() {
             WinningCoords = new List<Coordinates>();
             Won = false;
-            wintype = WINTYPE.NULL;
-            indexOfWin = -1;
-            checkSum = -1;
+            winId = WinMulti = checkSum = -1;
         }
 
-        public RouletteWin(WINTYPE type, int indexOfWin, int checkSum, List<Coordinates> WinCoords) {
+        public RouletteWin(int winId, int checkSum, int multi, List<Coordinates> WinCoords) {
             WinningCoords = new List<Coordinates>();
             WinningCoords.AddRange(WinCoords);
             Won = true;
-            wintype = type;
+            WinMulti = multi;
             this.checkSum = checkSum;
-            this.indexOfWin = indexOfWin;
+            this.winId = winId;
         }
     }
     
@@ -769,7 +541,10 @@ public class RouletteManager : MonoBehaviour
     [System.Serializable]
     public class Coordinates {
         public int Row, Column;
-        public Coordinates(int x, int y) { Row = x; Column = y; }
+        public int Value;
+        public Coordinates(int x, int y) { Column = x; Row = y; }
+
+        public Coordinates(int x, int y, int val) { Row = x; Column = y; Value = val; }
     }
 
     public sealed class TypeMultipliers {

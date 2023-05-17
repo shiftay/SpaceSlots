@@ -87,7 +87,7 @@ public class Roulette : MonoBehaviour
     public List<int> Results() {
         List<int> retVal = new List<int>();
         
-        for(int i = 2; i < 7; i++) {
+        for(int i = 2; i <= 4; i++) {
             currentItem = area_parent.GetChild(i);
             retVal.Add(potentialSprites.FindIndex(n => n == currentItem.GetComponent<Image>().sprite));
         }
@@ -120,3 +120,6 @@ public class ExperienceStar {
         this.value = value;
     }
 }
+
+
+

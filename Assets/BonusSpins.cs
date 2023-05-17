@@ -26,7 +26,6 @@ public class BonusSpins : MonoBehaviour
         currentBet = rm.currentData.currentBonusBet;
         calculating.text = "";
         calc = null;
-        glowLoops = 0;
         leavingSpins = false;
         calculating.alignment = TextAlignmentOptions.Left;
         value.text = currentBet.ToString("F2");
@@ -77,7 +76,6 @@ public class BonusSpins : MonoBehaviour
     }
 
     private int spins;
-    private int glowLoops;
     private const int MAXLOOPS = 5;
     public void Glowing() {
         main.SetTrigger("Close");
@@ -85,7 +83,6 @@ public class BonusSpins : MonoBehaviour
         leavingSpins = true;
     }
 
-    bool purchased = false;
     public void BuySpins() {
         if(rm.currentData.coinAmount < currentBet) return;
 
@@ -102,7 +99,7 @@ public class BonusSpins : MonoBehaviour
 
         screen.SetTrigger("Close");
         main.SetTrigger("Close");
-        purchased = true;
+        
         main.SetTrigger("Analyze");
     }
 
