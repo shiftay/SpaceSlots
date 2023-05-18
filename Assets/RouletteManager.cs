@@ -17,6 +17,8 @@ public class RouletteManager : MonoBehaviour
     public BonusSpins bonusSpins;
     public WinLine winLine;
     public Animator canvasAnim;
+    public Animator levelUpAnim;
+    public GameObject BonusGame;
 
     private void ToggleRoulettes(bool toggle, bool setAnims = false, float speed = 0f) {
         roulettes.ForEach(n => {
@@ -66,6 +68,7 @@ public class RouletteManager : MonoBehaviour
     private float timeElapsed = 0;
     private float duration = 2;
 
+    private bool LevelUp = false;
 /*
     Bonus Spins
 
@@ -79,36 +82,36 @@ public class RouletteManager : MonoBehaviour
     private void FixedUpdate() {
 
 
-        if(doingBonusSpins) {
-            RunSpins();
+        // if(doingBonusSpins) {
+            
+        //     RunSpins();
 
-            if(timer > MAXTIME) {
-                spinAmount -= 1;
-                timer = 0;
-                SetSpinsVal();
-                ToggleRoulettes(false);
-                isRunning = slowDown = false;
+        //     if(timer > MAXTIME) {
+        //         // spinAmount -= 1;
+        //         timer = 0;
+        //         ToggleRoulettes(false);
+        //         isRunning = slowDown = false;
 
-                RunResults();
-                if(Won) {
-                    // Animates the Winning tiles
-                    // Tells the Column which row is part of the winning 
-                    foreach(RouletteWin win in rWin) {
-                        foreach(Coordinates c in win.WinningCoords) {
-                            roulettes[c.Column].RunAnimation(c.Row);
-                        }
-                    }
+        //         RunResults();
+        //         if(Won) {
+        //             // Animates the Winning tiles
+        //             // Tells the Column which row is part of the winning 
+        //             foreach(RouletteWin win in rWin) {
+        //                 foreach(Coordinates c in win.WinningCoords) {
+        //                     roulettes[c.Column].RunAnimation(c.Row);
+        //                 }
+        //             }
 
-                    ShowWin(rWin);
+        //             ShowWin(rWin);
 
-                    CheckSpinAmt();
-                } else {
-                    // If bonus spins are left spin again.
-                    CheckSpinAmt();
-                }
+        //             CheckSpinAmt();
+        //         } else {
+        //             // If bonus spins are left spin again.
+        //             CheckSpinAmt();
+        //         }
 
-            }
-        }
+        //     }
+        // }
 
 
 
@@ -119,6 +122,7 @@ public class RouletteManager : MonoBehaviour
             timer += Time.fixedDeltaTime;
             // Stops the Roulettes to begin looking for a win.
             if(timer > MAXTIME ) {
+                timer = 0f; 
                 fakeSpin.SetTrigger("Stop");
                 ToggleRoulettes(false);
                 isRunning = slowDown = false;
@@ -134,25 +138,26 @@ public class RouletteManager : MonoBehaviour
             
 
                     ShowWin(rWin);
-                    winLine.TurnOn(rWin[0].winId);
-                    start.interactable = true;
+
+                    if(doingBonusSpins) CheckSpinAmt();
+                    else {
+                        winLine.TurnOn(rWin[0].winId);
+                        start.interactable = true;
+                    }
+                   
                 } else {
                     // *** DEBUG MODE *** 
                     // To let constant spinning to see wins.
-                    if(continuous) {
-                        Spin();
-                        timer = 0f;         
-                        
-                    } else {
-                        start.interactable = true;
-                    }
+                    if(doingBonusSpins) CheckSpinAmt();
+                    else start.interactable = true;
+
+                    if(continuous) Spin();
                 }
 
 
             }
         }
    
-
         // Create a Money adding effect of slow gain.
         if(AddingMoney) {
             if(currentData.coinAmount == TargetCoins) {
@@ -169,8 +174,28 @@ public class RouletteManager : MonoBehaviour
     }
 
 
+    public void ShowBonusGame() {
+        canvasAnim.SetTrigger("Bonus");
+    }
+
+
     public void CheckSpinAmt() {
-        if(spinAmount > 0 ) Invoke("Spin", 1.5f);
+        if(spinAmount > 0 ) {
+
+            if(LevelUp) {
+                levelUpAnim.SetTrigger("LevelUp");
+                BonusGame.SetActive(level % 2 == 0);
+                levelupSpinInfo.text = "+2 BONUS SPINS";
+                spinAmount += 2;
+                if(level % 2 != 0) {
+                    Invoke("Spin", 1.5f);
+                } 
+                
+            } else {
+                Invoke("Spin", 1.5f);
+            }
+
+        }
         else {
             doingBonusSpins = false;
             start.interactable = true;
@@ -233,10 +258,13 @@ public class RouletteManager : MonoBehaviour
 
             if(exp.Count > 0) {
                 // Add Exp up and add it to the bar
-                exp.ForEach(n => {
-                    currentXP += n.value;
-                    SetXP();
-                });
+                for(int i = 0; i < exp.Count; i++) {
+                    currentXP += exp[i].value;
+                    if(SetXP()){
+                        LevelUp = true;
+                        break;
+                    }
+                }
             }
         }
 
@@ -341,8 +369,9 @@ public class RouletteManager : MonoBehaviour
 #region UI
 
     public Button start, bonusSpinBtn;
-    public TextMeshProUGUI betValue, winValue, coinAmount, expLevel, bonusSpinValue;
+    public TextMeshProUGUI betValue, winValue, coinAmount, expLevel, bonusSpinValue, levelupSpinInfo;
     public Image xpSlider;
+
 
     private const float MAXBET = 10.00f;
     private const float MINBET = 2.50f;
@@ -355,11 +384,20 @@ public class RouletteManager : MonoBehaviour
 
     // Resets variables, and pays the money. If it can't pay the money, it won't spin.
     public void Spin() {
+        if(LevelUp) {
+            LevelUp = false;
+            levelUpAnim.SetTrigger("Close");
+        }
+
+
         if(!doingBonusSpins) {
             if(currentData.coinAmount - currentData.currentBet < 0) return;
 
             currentData.coinAmount -= currentData.currentBet;
             SetCoinValue();
+        } else {
+            spinAmount -= 1;
+            SetSpinsVal();
         }
 
         winLine.TurnOff();
@@ -392,14 +430,16 @@ public class RouletteManager : MonoBehaviour
         SetBetValue();
     }
 
-    public void SetXP() {
-
+    public bool SetXP() {
+        bool retVal = false;
         if(currentXP >= level * EXPPERLEVEL) {
             currentXP -= (level * EXPPERLEVEL);
             
             level++;
             
             xpAnim.SetTrigger("Shake");
+
+            retVal = true;
             //TODO: Run Level Up Animation
             //      Give extra spins      
             //      Increase multiplier on wins
@@ -407,6 +447,8 @@ public class RouletteManager : MonoBehaviour
 
         xpSlider.fillAmount = (float)currentXP / (float)(level * EXPPERLEVEL);
         expLevel.text = level.ToString();
+
+        return retVal;
     }
 
     public Animator xpAnim;
@@ -422,7 +464,8 @@ public class RouletteManager : MonoBehaviour
         currentXP = 0;
         expLevel.text = level.ToString();
         xpSlider.fillAmount = currentXP;
-        doingBonusSpins = true;
+
+        isRunning = doingBonusSpins = true;
         Won = false;
         ToggleRoulettes(true, true);
         fakeSpin.SetTrigger("Start");
