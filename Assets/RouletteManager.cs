@@ -7,7 +7,7 @@ using UnityEngine.UI;
 using TMPro;
 public class RouletteManager : MonoBehaviour
 {
-    private const int EXPPERLEVEL = 10;
+    private const int EXPPERLEVEL = 20;
     private const int WILDCARD = 8;
     private const float MAXTIME = 2.25f;
     public List<Roulette> roulettes;
@@ -70,7 +70,7 @@ public class RouletteManager : MonoBehaviour
     private float timeElapsed = 0;
     private float duration = 2;
 
-    private bool LevelUp = false;
+    private bool LevelUp = false, GainedXP = false;
 /*
     Bonus Spins
 
@@ -122,6 +122,9 @@ public class RouletteManager : MonoBehaviour
 
             }
         }
+
+
+ 
    
         // Create a Money adding effect of slow gain.
         if(AddingMoney) {
@@ -141,28 +144,16 @@ public class RouletteManager : MonoBehaviour
 
     public void ShowBonusGame() {
         bonusGame.Setup(this);
+
+        levelUpAnim.SetTrigger("Close");
         canvasAnim.SetTrigger("Bonus");
     }
 
 
     public void CheckSpinAmt() {
         if(spinAmount > 0 ) {
-
-            if(LevelUp) {
-                levelUpAnim.SetTrigger("LevelUp");
-                bonusGameBtn.SetActive(level % 2 == 0);
-                levelupSpinInfo.text = "+2 BONUS SPINS";
-                spinAmount += 2;
-                if(level % 2 != 0) {
-                    Invoke("Spin", 2.5f);
-                } 
-                
-            } else {
-                Invoke("Spin", 2.5f);
-            }
-
-        }
-        else {
+            if(!GainedXP) Invoke("Spin", 2.5f);
+        } else {
             doingBonusSpins = false;
             start.interactable = true;
 
@@ -210,11 +201,6 @@ public class RouletteManager : MonoBehaviour
         PullCoordinates();
         CheckForWin();
 
-
-        if(rWin.Count > 2) {
-            Debug.LogError("You won more than once.");
-        }
-
         // TODO: Needs to grab all Experience 
         if(doingBonusSpins) {
             List<ExperienceStar> exp = new List<ExperienceStar>();
@@ -222,18 +208,27 @@ public class RouletteManager : MonoBehaviour
                 exp.AddRange(n.Experience());
             });
 
+
+            GainedXP = exp.Count > 0;
             if(exp.Count > 0) {
+                TargetXP = 0;
                 // Add Exp up and add it to the bar
                 for(int i = 0; i < exp.Count; i++) {
-                    currentXP += exp[i].value;
-                    if(SetXP()){
-                        LevelUp = true;
-                        break;
-                    }
+                    TargetXP += exp[i].value;
                 }
-            }
-        }
 
+                Debug.Log("Target " + TargetXP + " exp Count " + exp.Count);
+
+                LevelUp = SetXP();
+            } 
+
+            int extraSpins = 0;
+            roulettes.ForEach(n=> {
+                extraSpins += n.BonusSpin();
+            });
+            
+            spinAmount += extraSpins;
+        }
 
         // Checks Diagonal
         // rWin.AddRange(DiagonalWin(Results));
@@ -268,7 +263,6 @@ public class RouletteManager : MonoBehaviour
 
     private void CheckForWin() {
         List<WinDefinitions> defn = WinDefinitions.ReturnDefs();
-
 
         defn.ForEach(n => {
             int lookup = -1;
@@ -344,8 +338,13 @@ public class RouletteManager : MonoBehaviour
     private int level;
     public int LEVEL {
         get { return level; }
-    } 
-    private int currentXP;
+    }
+
+    public bool AddingXP { get; private set; }
+    public float InitialXP { get; private set; }
+    public float TargetXP { get; private set; }
+
+    private float currentXP;
     private int spinAmount;
     public Animator winAnimator, bonusAnimator;
     public Animator winPopUp;
@@ -400,24 +399,49 @@ public class RouletteManager : MonoBehaviour
     }
 
     public bool SetXP() {
-        bool retVal = false;
-        if(currentXP >= level * EXPPERLEVEL) {
-            currentXP -= (level * EXPPERLEVEL);
-            
-            level++;
-            
-            xpAnim.SetTrigger("Shake");
+        InitialXP = currentXP;
 
-            retVal = true;
-            //TODO: Run Level Up Animation
-            //      Give extra spins      
-            //      Increase multiplier on wins
+        StartCoroutine(Experience());
+
+        return (InitialXP + TargetXP) > (level * EXPPERLEVEL);
+    }
+
+
+    IEnumerator Experience() {
+
+        xpAnim.SetTrigger("Shake");
+
+        while(TargetXP > 0) {
+            xpSlider.fillAmount = currentXP / (float)(level * EXPPERLEVEL);
+
+
+            currentXP ++;
+            TargetXP --;
+            if(currentXP >= (level * EXPPERLEVEL)) {
+                level++;
+                currentXP = 0;
+                levelUpAnim.SetTrigger("LevelUp");
+                bonusGameBtn.SetActive(level % 2 == 0);
+
+                levelupSpinInfo.text = "+2 BONUS SPINS";
+                spinAmount += 2;
+                expLevel.text = level.ToString();
+            }
+            
+
+                // levelUpAnim.SetTrigger("LevelUp");
+                // bonusGameBtn.SetActive(level % 2 == 0);
+
+
+            // timeElapsed += Time.deltaTime;
+            yield return new WaitForSeconds(0.15f);
         }
 
-        xpSlider.fillAmount = (float)currentXP / (float)(level * EXPPERLEVEL);
-        expLevel.text = level.ToString();
+        xpAnim.SetTrigger("Shake");
 
-        return retVal;
+        if(level % 2 != 0) {
+            Invoke("Spin", 3.5f);
+        }    
     }
 
     public Animator xpAnim;

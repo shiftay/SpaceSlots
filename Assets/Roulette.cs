@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class Roulette : MonoBehaviour
 {
-    private const int BONUS_SPIN_MODIFIER = 2;
+    private const int BONUS_SPIN = 9;
     private const int EXPERIENCE = 10;
 
     public Transform area_parent;
@@ -99,10 +99,24 @@ public class Roulette : MonoBehaviour
         
         List<ExperienceStar> retVal = new List<ExperienceStar>();
 
-        for(int i = 2; i < 7; i++) {
+        for(int i = 2; i <= 4; i++) {
             currentItem = area_parent.GetChild(i);
             if(potentialSprites.FindIndex(n => n == currentItem.GetComponent<Image>().sprite) == EXPERIENCE) {
-                retVal.Add(new ExperienceStar(i - 2, experienceSprites.FindIndex(n => n == currentItem.GetChild(0).GetComponent<Image>().sprite)));
+                retVal.Add(new ExperienceStar(i - 2, experienceSprites.FindIndex(n => n == currentItem.GetChild(0).GetComponent<Image>().sprite)+1));
+            }
+        }
+
+        return retVal;
+    }
+
+    public int BonusSpin() {
+        int retVal = 0;
+
+        for(int i = 2; i <= 4; i++) {
+            currentItem = area_parent.GetChild(i);
+            if(potentialSprites.FindIndex(n => n == currentItem.GetComponent<Image>().sprite) == BONUS_SPIN) {
+                retVal++;
+                currentItem.GetComponent<Animator>().SetTrigger(BONUS_SPIN.ToString());
             }
         }
 
