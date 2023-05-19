@@ -25,13 +25,13 @@ public class Loader : MonoBehaviour
         FileStream file;
 
         if (writeNew) 
-            return new GameData(10000f, 1.5f, 20.0f);
+            return new GameData(10000f, 1.5f, 200.0f);
 
         if(File.Exists(destination)) file = File.OpenRead(destination);
         else
         {
             Debug.Log("Couldn't load");
-            return new GameData(10000f, 1.5f, 20.0f);
+            return new GameData(10000f, 1.5f, 200.0f);
         }
 
         BinaryFormatter bf = new BinaryFormatter();

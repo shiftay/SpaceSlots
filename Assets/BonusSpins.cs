@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class BonusSpins : MonoBehaviour
 {
-    const float BETMINIMUM = 20.0f;
+    const float BETMINIMUM = 200.0f;
     const float BETMAXIMUM = 500.0f;
     
     public List<Sprite> numbers;

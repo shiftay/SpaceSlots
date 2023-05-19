@@ -18,7 +18,9 @@ public class RouletteManager : MonoBehaviour
     public WinLine winLine;
     public Animator canvasAnim;
     public Animator levelUpAnim;
-    public GameObject BonusGame;
+    public GameObject bonusGameBtn;
+    public BonusGame bonusGame;
+    public List<BonusPlanet> selectedPlanets;
 
     private void ToggleRoulettes(bool toggle, bool setAnims = false, float speed = 0f) {
         roulettes.ForEach(n => {
@@ -81,44 +83,7 @@ public class RouletteManager : MonoBehaviour
 
     private void FixedUpdate() {
 
-
-        // if(doingBonusSpins) {
-            
-        //     RunSpins();
-
-        //     if(timer > MAXTIME) {
-        //         // spinAmount -= 1;
-        //         timer = 0;
-        //         ToggleRoulettes(false);
-        //         isRunning = slowDown = false;
-
-        //         RunResults();
-        //         if(Won) {
-        //             // Animates the Winning tiles
-        //             // Tells the Column which row is part of the winning 
-        //             foreach(RouletteWin win in rWin) {
-        //                 foreach(Coordinates c in win.WinningCoords) {
-        //                     roulettes[c.Column].RunAnimation(c.Row);
-        //                 }
-        //             }
-
-        //             ShowWin(rWin);
-
-        //             CheckSpinAmt();
-        //         } else {
-        //             // If bonus spins are left spin again.
-        //             CheckSpinAmt();
-        //         }
-
-        //     }
-        // }
-
-
-
-
-
         if(isRunning) {
-            // RunSpins();
             timer += Time.fixedDeltaTime;
             // Stops the Roulettes to begin looking for a win.
             if(timer > MAXTIME ) {
@@ -175,6 +140,7 @@ public class RouletteManager : MonoBehaviour
 
 
     public void ShowBonusGame() {
+        bonusGame.Setup(this);
         canvasAnim.SetTrigger("Bonus");
     }
 
@@ -184,15 +150,15 @@ public class RouletteManager : MonoBehaviour
 
             if(LevelUp) {
                 levelUpAnim.SetTrigger("LevelUp");
-                BonusGame.SetActive(level % 2 == 0);
+                bonusGameBtn.SetActive(level % 2 == 0);
                 levelupSpinInfo.text = "+2 BONUS SPINS";
                 spinAmount += 2;
                 if(level % 2 != 0) {
-                    Invoke("Spin", 1.5f);
+                    Invoke("Spin", 2.5f);
                 } 
                 
             } else {
-                Invoke("Spin", 1.5f);
+                Invoke("Spin", 2.5f);
             }
 
         }
@@ -376,6 +342,9 @@ public class RouletteManager : MonoBehaviour
     private const float MAXBET = 10.00f;
     private const float MINBET = 2.50f;
     private int level;
+    public int LEVEL {
+        get { return level; }
+    } 
     private int currentXP;
     private int spinAmount;
     public Animator winAnimator, bonusAnimator;
@@ -452,8 +421,10 @@ public class RouletteManager : MonoBehaviour
     }
 
     public Animator xpAnim;
+    public int bonus_CurrentMultiplier;
 
     public void SetSpins(int spins) {
+        selectedPlanets = new List<BonusPlanet>();
         bonusSpinBtn.interactable = false;
         spinAmount = spins;
         start.interactable = false;
@@ -465,6 +436,7 @@ public class RouletteManager : MonoBehaviour
         expLevel.text = level.ToString();
         xpSlider.fillAmount = currentXP;
 
+        bonus_CurrentMultiplier = 1;
         isRunning = doingBonusSpins = true;
         Won = false;
         ToggleRoulettes(true, true);
@@ -475,20 +447,12 @@ public class RouletteManager : MonoBehaviour
         bonusSpinValue.text = spinAmount.ToString();
     }
 
-
     public void RemoveMoney() {
         currentData.currentBet -= 0.5f;
         if(currentData.currentBet < MINBET) currentData.currentBet = MINBET;
         
         SetBetValue();
     }
-
-    public void UpdateWin(string winAmount) {
-        winAnimator.SetTrigger("FadeIn");
-
-        winValue.text = winAmount;
-    }
-
 
     public float TargetCoins, InitialCoins; 
     
@@ -508,7 +472,11 @@ public class RouletteManager : MonoBehaviour
         
         winAmountText.text = "+ " + amt.ToString() + " COINS";
         winPopUp.SetTrigger("Won");
+
+        Invoke("Closewin", 1.5f);
     }
+
+    private void Closewin() { winPopUp.SetTrigger("Close"); }
 
     private float winAmount(List<RouletteWin> win) {
         float retVal = 0.0f;
