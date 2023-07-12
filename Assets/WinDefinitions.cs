@@ -5,9 +5,9 @@ public sealed class WinDefinitions {
     
     public List<RouletteManager.Coordinates> winningCoords; 
     public int id;
-    public int WinMulti;
+    public float WinMulti;
 
-    private WinDefinitions(List<RouletteManager.Coordinates> coords, int identifier, int Multi) {
+    private WinDefinitions(List<RouletteManager.Coordinates> coords, int identifier, float Multi) {
         winningCoords = new List<RouletteManager.Coordinates>(coords);
         id = identifier;
         WinMulti = Multi;
@@ -66,52 +66,52 @@ public sealed class WinDefinitions {
     public static WinDefinitions LINE_11 = new WinDefinitions(new List<RouletteManager.Coordinates>() {
         new RouletteManager.Coordinates(0,1), new RouletteManager.Coordinates(1,0),new RouletteManager.Coordinates(2,1),
         new RouletteManager.Coordinates(3,2), new RouletteManager.Coordinates(4,1),
-    }, 10, 1);
+    }, 10, 1.5f);
         
     public static WinDefinitions LINE_12 = new WinDefinitions(new List<RouletteManager.Coordinates>() {
         new RouletteManager.Coordinates(0,0), new RouletteManager.Coordinates(1,1),new RouletteManager.Coordinates(2,1),
         new RouletteManager.Coordinates(3,1), new RouletteManager.Coordinates(4,0),
-    }, 11, 1);
+    }, 11, 1.5f);
         
     public static WinDefinitions LINE_13 = new WinDefinitions(new List<RouletteManager.Coordinates>() {
         new RouletteManager.Coordinates(0,2), new RouletteManager.Coordinates(1,1),new RouletteManager.Coordinates(2,1),
         new RouletteManager.Coordinates(3,1), new RouletteManager.Coordinates(4,2),
-    }, 12, 1);
+    }, 12, 1.5f);
         
     public static WinDefinitions LINE_14 = new WinDefinitions(new List<RouletteManager.Coordinates>() {
         new RouletteManager.Coordinates(0,0), new RouletteManager.Coordinates(1,1),new RouletteManager.Coordinates(2,0),
         new RouletteManager.Coordinates(3,1), new RouletteManager.Coordinates(4,0),
-    }, 13, 1);
+    }, 13, 1.5f);
         
     public static WinDefinitions LINE_15 = new WinDefinitions(new List<RouletteManager.Coordinates>() {
         new RouletteManager.Coordinates(0,2), new RouletteManager.Coordinates(1,1),new RouletteManager.Coordinates(2,2),
         new RouletteManager.Coordinates(3,1), new RouletteManager.Coordinates(4,2),
-    }, 14, 1);
+    }, 14, 1.5f);
         
     public static WinDefinitions LINE_16 = new WinDefinitions(new List<RouletteManager.Coordinates>() {
         new RouletteManager.Coordinates(0,1), new RouletteManager.Coordinates(1,1),new RouletteManager.Coordinates(2,0),
         new RouletteManager.Coordinates(3,1), new RouletteManager.Coordinates(4,1),
-    }, 15, 1);
+    }, 15, 1.5f);
         
     public static WinDefinitions LINE_17 = new WinDefinitions(new List<RouletteManager.Coordinates>() {
         new RouletteManager.Coordinates(0,1), new RouletteManager.Coordinates(1,1),new RouletteManager.Coordinates(2,2),
         new RouletteManager.Coordinates(3,1), new RouletteManager.Coordinates(4,1),
-    }, 16, 1);
+    }, 16, 1.5f);
         
     public static WinDefinitions LINE_18 = new WinDefinitions(new List<RouletteManager.Coordinates>() {
         new RouletteManager.Coordinates(0,0), new RouletteManager.Coordinates(1,0),new RouletteManager.Coordinates(2,2),
         new RouletteManager.Coordinates(3,0), new RouletteManager.Coordinates(4,0),
-    }, 17, 1);
+    }, 17, 1.5f);
         
     public static WinDefinitions LINE_19 = new WinDefinitions(new List<RouletteManager.Coordinates>() {
         new RouletteManager.Coordinates(0,2), new RouletteManager.Coordinates(1,2),new RouletteManager.Coordinates(2,0),
         new RouletteManager.Coordinates(3,2), new RouletteManager.Coordinates(4,2),
-    }, 18, 1);
+    }, 18, 1.5f);
         
     public static WinDefinitions LINE_20 = new WinDefinitions(new List<RouletteManager.Coordinates>() {
         new RouletteManager.Coordinates(0,0), new RouletteManager.Coordinates(1,2),new RouletteManager.Coordinates(2,2),
         new RouletteManager.Coordinates(3,2), new RouletteManager.Coordinates(4,0),
-    }, 19, 1);
+    }, 19, 1.5f);
         
     
 

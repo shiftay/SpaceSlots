@@ -26,6 +26,7 @@ public class RouletteManager : MonoBehaviour
         roulettes.ForEach(n => {
             n.speed = speed;
             n.toggleRoulette = toggle;
+            n.index = 0;
             if(setAnims) n.Spin();
         });
     }
@@ -88,8 +89,12 @@ public class RouletteManager : MonoBehaviour
             // Stops the Roulettes to begin looking for a win.
             if(timer > MAXTIME ) {
                 timer = 0f; 
+                roulettes.ForEach(n => {
+                    n.SetSlots();
+                });
                 fakeSpin.SetTrigger("Stop");
-                ToggleRoulettes(false);
+
+
                 isRunning = slowDown = false;
 
                 RunResults();
@@ -228,6 +233,7 @@ public class RouletteManager : MonoBehaviour
             });
             
             spinAmount += extraSpins;
+            SetSpinsVal();
         }
 
         // Checks Diagonal
@@ -306,26 +312,6 @@ public class RouletteManager : MonoBehaviour
     
 #endregion
 
-#region Notes
-// Define
-    // [x] Horizontal Win 
-    // [x] Verical Win
-    // [x] Diagonal Win
-    // [x] X Win
-    // [x] T Win
-    // [x] Inverted T Win
-    // [] L Win
-    // [x] Square Win
-    // Define 
-    // [x] WildCards
-    // [] Multiplier Gain + Use
-    // [] Bonus Spins (Auto Spin with Cumulative win and a chance to gain more spins.)
-
-    // Regular Roulette, will not feature bonus spins
-
-    // Change the chance of specific
-#endregion Notes
-
 #region UI
 
     public Button start, bonusSpinBtn;
@@ -333,8 +319,9 @@ public class RouletteManager : MonoBehaviour
     public Image xpSlider;
 
 
-    private const float MAXBET = 10.00f;
+    private const float MAXBET = 50.00f;
     private const float MINBET = 2.50f;
+    private const float INTERVAL = 2.50f;
     private int level;
     public int LEVEL {
         get { return level; }
@@ -392,7 +379,7 @@ public class RouletteManager : MonoBehaviour
     }
 
     public void AddMoney() {
-        currentData.currentBet += 0.5f;
+        currentData.currentBet += INTERVAL;
         if(currentData.currentBet > MAXBET) currentData.currentBet = MAXBET;
         
         SetBetValue();
@@ -425,6 +412,7 @@ public class RouletteManager : MonoBehaviour
 
                 levelupSpinInfo.text = "+2 BONUS SPINS";
                 spinAmount += 2;
+                SetSpinsVal();
                 expLevel.text = level.ToString();
             }
             
@@ -439,13 +427,24 @@ public class RouletteManager : MonoBehaviour
 
         xpAnim.SetTrigger("Shake");
 
-        if(level % 2 != 0) {
-            Invoke("Spin", 3.5f);
-        }    
+        if(!LevelUp) {
+            if(spinAmount > 0) Invoke("Spin", 3.5f);
+            else {
+                doingBonusSpins = false;
+                start.interactable = true;
+
+                xpAnim.SetTrigger("FadeOut");
+                bonusAnimator.SetTrigger("Close");
+            }
+        }   
     }
 
     public Animator xpAnim;
     public int bonus_CurrentMultiplier;
+
+    public void ContinueBonus() {
+       Invoke("Spin", 1.5f);
+    }
 
     public void SetSpins(int spins) {
         selectedPlanets = new List<BonusPlanet>();
@@ -472,7 +471,7 @@ public class RouletteManager : MonoBehaviour
     }
 
     public void RemoveMoney() {
-        currentData.currentBet -= 0.5f;
+        currentData.currentBet -= INTERVAL;
         if(currentData.currentBet < MINBET) currentData.currentBet = MINBET;
         
         SetBetValue();
@@ -481,11 +480,7 @@ public class RouletteManager : MonoBehaviour
     public float TargetCoins, InitialCoins; 
     
     public void ShowWin(List<RouletteWin> win) {
-        if(win.Count > 2) {
-            winTypeText.text = "MULTI WIN";
-        } else {
-            // winTypeText.text = win[0].wintype.ToString();
-        }
+        winTypeText.text = "CONGRATULATIONS!";
 
         float amt = winAmount(win);
 
@@ -508,7 +503,8 @@ public class RouletteManager : MonoBehaviour
         foreach(RouletteWin rw in win) {
             retVal += IconMultipliers.summary.Find(n => n.checkSum == rw.checkSum).multiplier 
                     * rw.WinMulti
-                    * currentData.currentBet;
+                    * currentData.currentBet
+                    * (doingBonusSpins ? bonus_CurrentMultiplier : 1);
         }
 
         return retVal;
@@ -549,19 +545,12 @@ public class RouletteManager : MonoBehaviour
     public class RouletteWin {
         public bool Won;
         public int checkSum;
-        public int WinMulti;
+        public float WinMulti;
         public int winId;
         public List<Coordinates> WinningCoords;
         // Index of Win must have it's own definition, so as to cover which row or column, or starting diagonal.
 
-
-        public RouletteWin() {
-            WinningCoords = new List<Coordinates>();
-            Won = false;
-            winId = WinMulti = checkSum = -1;
-        }
-
-        public RouletteWin(int winId, int checkSum, int multi, List<Coordinates> WinCoords) {
+        public RouletteWin(int winId, int checkSum, float multi, List<Coordinates> WinCoords) {
             WinningCoords = new List<Coordinates>();
             WinningCoords.AddRange(WinCoords);
             Won = true;

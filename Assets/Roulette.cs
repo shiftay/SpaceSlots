@@ -16,18 +16,29 @@ public class Roulette : MonoBehaviour
     public float speed;
     int currentChoice;
     public RouletteManager rm;
+    public int index = 0;
 
-    // Update is called once per frame
-    void Update()
-    {
-        if(toggleRoulette && time > speed) {
-            time = 0;
 
-            currentItem = area_parent.GetChild(area_parent.childCount - 1);
+    public void Spin() {
+        for(int i = 0; i < area_parent.childCount; i++){
+            currentItem = area_parent.GetChild(i);
+            if(!currentItem.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Default")){
+                currentItem.GetComponent<Animator>().SetTrigger("Default");
+            }
+        }
 
-            //
-            // TODO: Update this for if it should include bonus spins.
-            // currentChoice = Random.Range(0, potentialSprites.Count - BONUS_SPIN_MODIFIER);
+        index = 0;
+    }
+
+    public void RunAnimation(int index) {
+        currentItem = area_parent.GetChild(index);
+        currentItem.GetComponent<Animator>().SetTrigger(potentialSprites.FindIndex(n => n == currentItem.GetComponent<Image>().sprite).ToString());
+
+    }
+
+    public void SetSlots() {
+        for(int i = 0; i < area_parent.childCount; i++) {
+            currentItem = area_parent.GetChild(i);
 
             currentChoice = rm.doingBonusSpins ? Randomizer.BonusRoll() : Randomizer.BasicRoll();
 
@@ -38,38 +49,7 @@ public class Roulette : MonoBehaviour
             if(currentChoice == EXPERIENCE) {
                 expLevel.GetComponent<Image>().sprite = experienceSprites[Random.Range(0,experienceSprites.Count)];
             } 
-            
-            currentItem.SetAsFirstSibling();
-        } else if(toggleRoulette) {
-            time += Time.fixedDeltaTime;       
         }
-    }
-
-
-    public void Spin() {
-        for(int i = 0; i < area_parent.childCount; i++){
-            currentItem = area_parent.GetChild(i);
-            if(!currentItem.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Default")){
-                currentItem.GetComponent<Animator>().SetTrigger("Default");
-                Debug.Log("Inside Spin on Roulette");
-            }
-               
-            // currentItem.GetComponent<Animator>().enabled = false;
-        }
-    }
-
-// 2 to 6 = 0 to 4
-
-    public void RunAnimation(int index) {
-        int childIndex = BonusSpins.scale(0, 4, 2, 6, index);
-
-        currentItem = area_parent.GetChild(childIndex);
-
-        Debug.LogWarning("Run Animate??? " + index + " , " + childIndex);
-
-        currentItem.GetComponent<Animator>().SetTrigger(potentialSprites.FindIndex(n => n == currentItem.GetComponent<Image>().sprite).ToString());
-        
-        // currentItem.GetComponent<Animator>().enabled = true;
     }
 
     private Transform currentItem;
@@ -87,7 +67,7 @@ public class Roulette : MonoBehaviour
     public List<int> Results() {
         List<int> retVal = new List<int>();
         
-        for(int i = 2; i <= 4; i++) {
+        for(int i = 0; i < area_parent.childCount; i++) {
             currentItem = area_parent.GetChild(i);
             retVal.Add(potentialSprites.FindIndex(n => n == currentItem.GetComponent<Image>().sprite));
         }
@@ -99,7 +79,7 @@ public class Roulette : MonoBehaviour
         
         List<ExperienceStar> retVal = new List<ExperienceStar>();
 
-        for(int i = 2; i <= 4; i++) {
+        for(int i = 0; i < area_parent.childCount; i++) {
             currentItem = area_parent.GetChild(i);
             if(potentialSprites.FindIndex(n => n == currentItem.GetComponent<Image>().sprite) == EXPERIENCE) {
                 retVal.Add(new ExperienceStar(i - 2, experienceSprites.FindIndex(n => n == currentItem.GetChild(0).GetComponent<Image>().sprite)+1));
@@ -112,7 +92,7 @@ public class Roulette : MonoBehaviour
     public int BonusSpin() {
         int retVal = 0;
 
-        for(int i = 2; i <= 4; i++) {
+        for(int i = 0; i < area_parent.childCount; i++) {
             currentItem = area_parent.GetChild(i);
             if(potentialSprites.FindIndex(n => n == currentItem.GetComponent<Image>().sprite) == BONUS_SPIN) {
                 retVal++;

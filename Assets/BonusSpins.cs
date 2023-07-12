@@ -6,140 +6,89 @@ using UnityEngine.UI;
 
 public class BonusSpins : MonoBehaviour
 {
-    const float BETMINIMUM = 200.0f;
-    const float BETMAXIMUM = 500.0f;
-    
-    public List<Sprite> numbers;
-    public Image firstNum, secondNum;
 
-    public TextMeshProUGUI value, calculating;
-
-    public Animator main, screen;
+    private const int NULL = -1;
+    private List<BonusSpinInfo> spinInfos = new List<BonusSpinInfo>() { 
+        new BonusSpinInfo(0, 4, 1, 4, 100), 
+        new BonusSpinInfo(1, 6, 2, 5, 250),
+        new BonusSpinInfo(2, 8, 2, 6, 500),
+        new BonusSpinInfo(3, 10, 3, 7, 1000),
+        new BonusSpinInfo(4, 15, 3, 11, 12500),
+    };
     private bool makingScreen;
     RouletteManager rm;
     private float currentBet;
-
+    public Animator anim;
     public bool leavingSpins = false;
+
+    public Sprite highlight, unhighlighted;
+    /* 
+        Amount Spins, Additional Range, Price
+        4, 1-3, 100
+        6, 2-4, 250
+        8, 2-5, 500
+        10, 3-6, 1000
+        15, 3-10, 2500
+    */
 
     public void Open(RouletteManager rm) {
         this.rm = rm;
         currentBet = rm.currentData.currentBonusBet;
-        calculating.text = "";
-        calc = null;
-        leavingSpins = false;
-        calculating.alignment = TextAlignmentOptions.Left;
-        value.text = currentBet.ToString("F2");
-        main.SetTrigger("Open");
+        anim.SetTrigger("Open");
     }
 
     public void OpenComputerForScreen() {
-        main.SetTrigger("Open");
+
         makingScreen = true;
     }
 
     public void CloseScreen() {
-        leavingSpins = true;
-        screen.SetTrigger("Close");
-        main.SetTrigger("Close");
-    }
-
-    public void OpenScreen() {
-        if(makingScreen) {
-           screen.SetTrigger("Open");
-           makingScreen = false; 
-        } else {
-            
-            // Setup Loot in the screen.
-            main.SetTrigger("Open");
-            calculating.text = "+" + spins.ToString() + " Bonus Spins";   
-        }
+        anim.SetTrigger("Close");
     }
 
     public void LeaveSpins() {
-        if(leavingSpins) main.SetTrigger("Close");
-    }
-
-    public void AddMoney() {
-        currentBet += BETMINIMUM;
-        if(currentBet > BETMAXIMUM) currentBet = BETMAXIMUM;
-        SetText();
-    }
-
-    public void RemoveMoney() {
-        currentBet -= BETMINIMUM;
-        if(currentBet < BETMINIMUM) currentBet = BETMINIMUM;
-        SetText();
-    }
-
-    private void SetText() {
-        value.text = currentBet.ToString();
-    }
-
-    private int spins;
-    private const int MAXLOOPS = 5;
-    public void Glowing() {
-        main.SetTrigger("Close");
-        rm.SetSpins(spins);
-        leavingSpins = true;
-    }
-
-    public void BuySpins() {
-        if(rm.currentData.coinAmount < currentBet) return;
-
-        rm.currentData.coinAmount -= currentBet;
-
-        rm.SetCoinValue();
-
-
-        spins = Random.Range(5, 10) + scale(1, 25, 1, 10, (int)(currentBet / BETMINIMUM));
-
-        secondNum.sprite = numbers[spins % 10];
-        firstNum.sprite = numbers[1];
-        firstNum.gameObject.SetActive(Mathf.CeilToInt(spins / 10) > 0);
-
-        screen.SetTrigger("Close");
-        main.SetTrigger("Close");
-        
-        main.SetTrigger("Analyze");
-    }
-
-    public static int scale(int OldMin, int OldMax, int NewMin, int NewMax, int OldValue){
-        int OldRange = (OldMax - OldMin);
-        int NewRange = (NewMax - NewMin);
-        int NewValue = (((OldValue - OldMin) * NewRange) / OldRange) + NewMin;
-    
-        return(NewValue);
-    }
-
-    Coroutine calc = null;
-
-    public void Analyze() {
-        if(calc == null)
-            calc = StartCoroutine(Calculating());
-    }
-
-    List<string> Calc = new List<string>() { "Calculating Bonus Spins .", "Calculating Bonus Spins . .", "Calculating Bonus Spins . . ."};
-
-    IEnumerator Calculating() {
-        float timer = 0;
-        int index = 0;
-        
-        while(timer < 5f) {
-            calculating.text = Calc[index];
-
-            yield return new WaitForEndOfFrame();
-            if(Time.frameCount % 20 == 0){
-                index++;
-                if(index > 2) index = 0;
-            }            
-            timer += Time.fixedDeltaTime;
-        }
        
-       main.SetTrigger("Open");
-       calc = null;
-       calculating.text = "";
-       calculating.alignment = TextAlignmentOptions.Center;
     }
 
+    public List<Button> shopButtons;
+    private int currentSelected = -1;
 
+    public void Click(Button buttonPressed) {
+        int clickedIndex = shopButtons.FindIndex(n => n == buttonPressed);
+
+        if(currentSelected != NULL) 
+            shopButtons[currentSelected].image.sprite = unhighlighted;
+
+        if(currentSelected == clickedIndex) {
+
+            
+
+
+            // Selected the same one.
+            BonusSpinInfo temp = spinInfos.Find(n => n.id == clickedIndex);
+            if(rm.currentData.coinAmount < temp.price) {
+                // TODO: Play sfx + vfx for not having the money to purchase
+                shopButtons[clickedIndex].image.sprite = highlight;
+                currentSelected = clickedIndex;
+                return;
+            }
+
+            anim.SetTrigger("Close");
+            rm.currentData.coinAmount -= temp.price;
+            rm.SetCoinValue();
+            rm.SetSpins(temp.baseSpin + Random.Range(temp.additionalMin, temp.additionalMax));
+           
+        } else  {
+            shopButtons[clickedIndex].image.sprite = highlight;
+            currentSelected = clickedIndex;
+        }
+    } 
+
+
+    private class BonusSpinInfo {
+        public int baseSpin, additionalMin, additionalMax, price, id;
+        public BonusSpinInfo(int id, int baseSpin, int min, int max, int price) {
+            this.id = id; this.baseSpin = baseSpin; additionalMin = min; additionalMax = max; this.price = price;
+        }
+    }
 }

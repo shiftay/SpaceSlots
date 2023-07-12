@@ -136,6 +136,7 @@ public class BonusGame : MonoBehaviour
     public void CloseOut() {
         rewardAnim.SetTrigger("Close");
         rm.canvasAnim.SetTrigger("Game");
+        rm.ContinueBonus();
     }
 
     // public void CloseScreen() {

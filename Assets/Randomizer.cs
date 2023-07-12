@@ -30,7 +30,7 @@ public sealed class Randomizer
     public static Randomizer SPACE_GIRL = new Randomizer(10, 5);
     public static Randomizer GIRL_ALIEN = new Randomizer(7,6);
     public static Randomizer CAPTAIN = new Randomizer(5, 7);
-    public static Randomizer WILDCARD = new Randomizer(25, 8);
+    public static Randomizer WILDCARD = new Randomizer(12, 8);
     public static Randomizer BONUS_SPIN = new Randomizer(4, 9);
     public static Randomizer EXPERIENCE = new Randomizer(16, 10);
 
