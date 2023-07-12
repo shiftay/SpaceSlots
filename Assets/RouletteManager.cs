@@ -157,7 +157,7 @@ public class RouletteManager : MonoBehaviour
 
     public void CheckSpinAmt() {
         if(spinAmount > 0 ) {
-            if(!GainedXP) Invoke("Spin", 2.5f);
+            if(!GainedXP) Invoke("Spin", 1.75f);
         } else {
             doingBonusSpins = false;
             start.interactable = true;
@@ -339,11 +339,13 @@ public class RouletteManager : MonoBehaviour
 
     // Resets variables, and pays the money. If it can't pay the money, it won't spin.
     public void Spin() {
+        Debug.Log("Running Spin");
+
+
         if(LevelUp) {
             LevelUp = false;
             levelUpAnim.SetTrigger("Close");
         }
-
 
         if(!doingBonusSpins) {
             if(currentData.coinAmount - currentData.currentBet < 0) return;
@@ -408,7 +410,7 @@ public class RouletteManager : MonoBehaviour
                 level++;
                 currentXP = 0;
                 levelUpAnim.SetTrigger("LevelUp");
-                bonusGameBtn.SetActive(level % 2 == 0);
+                // bonusGameBtn.SetActive(level % 2 == 0);
 
                 levelupSpinInfo.text = "+2 BONUS SPINS";
                 spinAmount += 2;
@@ -425,10 +427,11 @@ public class RouletteManager : MonoBehaviour
             yield return new WaitForSeconds(0.15f);
         }
 
+        GainedXP = false;
         xpAnim.SetTrigger("Shake");
 
         if(!LevelUp) {
-            if(spinAmount > 0) Invoke("Spin", 3.5f);
+            if(spinAmount > 0) Invoke("Spin", 2.5f);
             else {
                 doingBonusSpins = false;
                 start.interactable = true;
@@ -436,7 +439,17 @@ public class RouletteManager : MonoBehaviour
                 xpAnim.SetTrigger("FadeOut");
                 bonusAnimator.SetTrigger("Close");
             }
-        }   
+        } else {
+            StartCoroutine(LevelUpClose());
+        }
+    }
+
+
+    IEnumerator LevelUpClose() {
+        yield return new WaitForSeconds(1.0f);
+        levelUpAnim.SetTrigger("Close");
+        LevelUp = GainedXP = false;
+        CheckSpinAmt();
     }
 
     public Animator xpAnim;
