@@ -224,7 +224,7 @@ public class RouletteManager : MonoBehaviour
 
                 Debug.Log("Target " + TargetXP + " exp Count " + exp.Count);
 
-                LevelUp = SetXP();
+                SetXP();
             } 
 
             int extraSpins = 0;
@@ -339,9 +339,6 @@ public class RouletteManager : MonoBehaviour
 
     // Resets variables, and pays the money. If it can't pay the money, it won't spin.
     public void Spin() {
-        Debug.Log("Running Spin");
-
-
         if(LevelUp) {
             LevelUp = false;
             levelUpAnim.SetTrigger("Close");
@@ -387,12 +384,12 @@ public class RouletteManager : MonoBehaviour
         SetBetValue();
     }
 
-    public bool SetXP() {
+    public void SetXP() {
         InitialXP = currentXP;
 
-        StartCoroutine(Experience());
+        LevelUp = (InitialXP + TargetXP) > (level * EXPPERLEVEL);
 
-        return (InitialXP + TargetXP) > (level * EXPPERLEVEL);
+        StartCoroutine(Experience());
     }
 
 
@@ -427,7 +424,7 @@ public class RouletteManager : MonoBehaviour
             yield return new WaitForSeconds(0.15f);
         }
 
-        GainedXP = false;
+        
         xpAnim.SetTrigger("Shake");
 
         if(!LevelUp) {
@@ -442,10 +439,13 @@ public class RouletteManager : MonoBehaviour
         } else {
             StartCoroutine(LevelUpClose());
         }
+
+        GainedXP = false;
     }
 
 
     IEnumerator LevelUpClose() {
+        Debug.Log("LevelUpClose()");
         yield return new WaitForSeconds(1.0f);
         levelUpAnim.SetTrigger("Close");
         LevelUp = GainedXP = false;

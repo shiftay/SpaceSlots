@@ -21641,8 +21641,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9876840f1adcee84a9ac7c6c063633a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  value: {fileID: 0}
-  calculating: {fileID: 0}
+  anim: {fileID: 1480727705}
   leavingSpins: 0
   highlight: {fileID: 21300000, guid: 288220f04c03a954f9428885b873a9ce, type: 3}
   unhighlighted: {fileID: 21300000, guid: 9638185a8de2d5b41a17de439deaba70, type: 3}
@@ -29726,9 +29725,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 653474606}
-        m_TargetAssemblyTypeName: Shop, Assembly-CSharp
-        m_MethodName: CloseShop
+      - m_Target: {fileID: 1480727703}
+        m_TargetAssemblyTypeName: BonusSpins, Assembly-CSharp
+        m_MethodName: CloseScreen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
