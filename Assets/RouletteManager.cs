@@ -9,7 +9,7 @@ public class RouletteManager : MonoBehaviour
 {
     private const int EXPPERLEVEL = 20;
     private const int WILDCARD = 8;
-    private const float MAXTIME = 2.25f;
+    private const float MAXTIME = 1.91f;
     public List<Roulette> roulettes;
     public Loader loader;
     public GameData currentData;
@@ -21,6 +21,7 @@ public class RouletteManager : MonoBehaviour
     public GameObject bonusGameBtn;
     public BonusGame bonusGame;
     public List<BonusPlanet> selectedPlanets;
+    public AudioManager audioManager;
 
     private void ToggleRoulettes(bool toggle, bool setAnims = false, float speed = 0f) {
         roulettes.ForEach(n => {
@@ -360,6 +361,7 @@ public class RouletteManager : MonoBehaviour
         Won = false;
         ToggleRoulettes(true, true);
         fakeSpin.SetTrigger("Start");
+        audioManager.PlaySFX(ClipIdentifier.SPIN);
         isRunning = true;
     }
 
