@@ -13,7 +13,7 @@ public class BonusSpins : MonoBehaviour
         new BonusSpinInfo(1, 6, 2, 5, 250),
         new BonusSpinInfo(2, 8, 2, 6, 500),
         new BonusSpinInfo(3, 10, 3, 7, 1000),
-        new BonusSpinInfo(4, 15, 3, 11, 12500),
+        new BonusSpinInfo(4, 15, 3, 11, 2500),
     };
     private bool makingScreen;
     RouletteManager rm;
@@ -60,12 +60,9 @@ public class BonusSpins : MonoBehaviour
             shopButtons[currentSelected].image.sprite = unhighlighted;
 
         if(currentSelected == clickedIndex) {
-
-            
-
-
             // Selected the same one.
             BonusSpinInfo temp = spinInfos.Find(n => n.id == clickedIndex);
+
             if(rm.currentData.coinAmount < temp.price) {
                 // TODO: Play sfx + vfx for not having the money to purchase
                 shopButtons[clickedIndex].image.sprite = highlight;
