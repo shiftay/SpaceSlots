@@ -143,22 +143,11 @@ public class RouletteManager : MonoBehaviour
             doingBonusSpins = false;
             start.interactable = true;
 
+            multiplierController.HideMultiplier();
             xpAnim.SetTrigger("FadeOut");
             bonusAnimator.SetTrigger("Close");
         }
     }
-
-    // public void RunSpins() {
-    //     timer += Time.fixedDeltaTime;
-    //     // Stops the fake Spin animatiion
-    //     if(timer > 1f && !fakeSpin.GetCurrentAnimatorStateInfo(0).IsName("RouletteComplete")) {
-    //         fakeSpin.SetTrigger("Stop");
-    //     } 
-    //     // Slows down the Roulette spins
-    //     if(timer > 2f && !slowDown) {
-    //         slowDown = true;
-    //     }
-    // }
 
 
     public void RunResults() {
@@ -315,7 +304,8 @@ public class RouletteManager : MonoBehaviour
     private int spinAmount;
     public Animator winAnimator, bonusAnimator;
     public Animator winPopUp;
-    public TextMeshProUGUI winTypeText, winAmountText;
+    public TextMeshProUGUI winTypeText;
+    public MultiplierController multiplierController;
 
     // Resets variables, and pays the money. If it can't pay the money, it won't spin.
     public void Spin() {
@@ -397,6 +387,9 @@ public class RouletteManager : MonoBehaviour
                 spinAmount += 2;
                 SetSpinsVal();
                 expLevel.text = level.ToString();
+                bonus_CurrentMultiplier++;
+                multiplierController.SetMultiplier(bonus_CurrentMultiplier);
+                LevelUp = true;
             }
             
 
@@ -455,8 +448,9 @@ public class RouletteManager : MonoBehaviour
         currentXP = 0;
         expLevel.text = level.ToString();
         xpSlider.fillAmount = currentXP;
-
-        bonus_CurrentMultiplier = 1;
+        bonus_CurrentMultiplier = 2;
+        multiplierController.SetMultiplier(bonus_CurrentMultiplier);
+        multiplierController.ShowMultiplier();
         isRunning = doingBonusSpins = true;
         Won = false;
         fakeSpin.SetTrigger("Start");
