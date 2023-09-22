@@ -25,13 +25,13 @@ public class Loader : MonoBehaviour
         FileStream file;
 
         if (writeNew) 
-            return new GameData(10000f, 2.5f, 25.0f);
+            return new GameData(10000f, 2.5f, 25.0f, true, true);
 
         if(File.Exists(destination)) file = File.OpenRead(destination);
         else
         {
             Debug.Log("Couldn't load");
-            return new GameData(10000f, 2.5f, 25.0f);
+            return new GameData(10000f, 2.5f, 25.0f, true, true);
         }
 
         BinaryFormatter bf = new BinaryFormatter();
@@ -51,11 +51,15 @@ public class GameData
     public float coinAmount;
     public float currentBet;
     public float currentBonusBet;
+    public bool currentMusic;
+    public bool currentSfx;
 
-    public GameData(float coin, float bet, float bonus)
+    public GameData(float coin, float bet, float bonus, bool music, bool sfx)
     {
         coinAmount = coin;
         currentBet = bet;
         currentBonusBet = bonus;
+        currentMusic = music;
+        currentSfx = sfx;
     }
 }

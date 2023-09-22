@@ -36,6 +36,10 @@ public class Roulette : MonoBehaviour
 
     }
 
+    public void RunDefault() {
+        currentItem = area_parent.GetChild(index);
+    }
+
     public void SetSlots() {
         for(int i = 0; i < area_parent.childCount; i++) {
             currentItem = area_parent.GetChild(i);

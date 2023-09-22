@@ -7,12 +7,13 @@ public enum ClipIdentifier { SPIN = 0, WIN, INVALID  }
 
 public class AudioManager : MonoBehaviour
 {
-
+    public const float BASEMUSICVOLUME = 0.25f;
+    public const float BASESFXVOLUME = 0.5f;
     public AudioSource musicSource, sfxSource;
     public List<ClipDesc> sfxClips;
     public AudioClip soundLoop;
 
-    public float volumetest;
+    public float musicVolume;
     public float sfxVolume;
 
 
@@ -20,16 +21,18 @@ public class AudioManager : MonoBehaviour
     void Start()
     {
         sfxSource.volume = sfxVolume;
-        musicSource.volume = volumetest;
+        musicSource.volume = musicVolume;
         musicSource.clip = soundLoop;
         musicSource.loop = true;
         musicSource.Play();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    public void UpdateSFXVolume(bool enabled) {
+        sfxSource.volume = enabled ? BASESFXVOLUME : 0;
+    }
+
+    public void UpdateMusicVolume(bool enabled) {
+        musicSource.volume = enabled ? BASEMUSICVOLUME : 0;
     }
 
     public void PlaySFX(ClipIdentifier id) {
