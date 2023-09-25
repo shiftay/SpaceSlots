@@ -7,9 +7,14 @@ using UnityEngine.UI;
 using TMPro;
 public class RouletteManager : MonoBehaviour
 {
+    public GameObject winButtonHolder;
+    public ExpBonusGlitter glitter;
+    public Animator multiplierAnim;
     private const int EXPPERLEVEL = 20;
     private const int WILDCARD = 8;
     private const float MAXTIME = 1.91f;
+    public List<Sprite> potentialSprites;
+    public List<Sprite> experienceSprites;
     public List<Roulette> roulettes;
     public Loader loader;
     public GameData currentData;
@@ -19,8 +24,8 @@ public class RouletteManager : MonoBehaviour
     public Animator canvasAnim;
     public Animator levelUpAnim;
     public GameObject bonusGameBtn;
-    public BonusGame bonusGame;
-    public List<BonusPlanet> selectedPlanets;
+    // public BonusGame bonusGame;
+    // public List<BonusPlanet> selectedPlanets;
     public AudioManager audioManager;
 
     private bool isRunning = false, slowDown = false;
@@ -51,8 +56,8 @@ public class RouletteManager : MonoBehaviour
         currentData = loader.LoadFile(writeNewFile);
 
         roulettes.ForEach(n => {
-            n.UpdateAll();
             n.rm = this;
+            n.UpdateAll();
         });
 
         doingBonusSpins = false;
@@ -129,7 +134,7 @@ public class RouletteManager : MonoBehaviour
 
 
     public void ShowBonusGame() {
-        bonusGame.Setup(this);
+        // bonusGame.Setup(this);
 
         levelUpAnim.SetTrigger("Close");
         canvasAnim.SetTrigger("Bonus");
@@ -182,9 +187,15 @@ public class RouletteManager : MonoBehaviour
                 exp.AddRange(n.Experience());
             });
 
+            roulettes.ForEach(n => {
+                n.Glitter();
+            });
 
             GainedXP = exp.Count > 0;
             if(exp.Count > 0) {
+
+
+
                 TargetXP = 0;
                 // Add Exp up and add it to the bar
                 for(int i = 0; i < exp.Count; i++) {
@@ -368,9 +379,6 @@ public class RouletteManager : MonoBehaviour
 
 
     IEnumerator Experience() {
-
-        xpAnim.SetTrigger("Shake");
-
         while(TargetXP > 0) {
             xpSlider.fillAmount = currentXP / (float)(level * EXPPERLEVEL);
 
@@ -383,11 +391,14 @@ public class RouletteManager : MonoBehaviour
                 levelUpAnim.SetTrigger("LevelUp");
                 // bonusGameBtn.SetActive(level % 2 == 0);
 
-                levelupSpinInfo.text = "+2 BONUS SPINS";
+                levelupSpinInfo.text = "+2 BONUS SPINS\n INCREASED MULTIPLIER";
                 spinAmount += 2;
                 SetSpinsVal();
                 expLevel.text = level.ToString();
+
+                // TODO: Have levelup have a Continue Button.
                 bonus_CurrentMultiplier++;
+                multiplierAnim.SetTrigger("Pop");
                 multiplierController.SetMultiplier(bonus_CurrentMultiplier);
                 LevelUp = true;
             }
@@ -402,7 +413,7 @@ public class RouletteManager : MonoBehaviour
         }
 
         
-        xpAnim.SetTrigger("Shake");
+        // xpAnim.SetTrigger("Shake");
 
         if(!LevelUp) {
             if(spinAmount > 0) Invoke("Spin", 2.5f);
@@ -413,18 +424,18 @@ public class RouletteManager : MonoBehaviour
                 xpAnim.SetTrigger("FadeOut");
                 bonusAnimator.SetTrigger("Close");
             }
-        } else {
-            StartCoroutine(LevelUpClose());
-        }
+        } 
 
         GainedXP = false;
     }
 
+    public void CloseLevelUp() {
+        StartCoroutine(LevelUpClose());
+    }
 
     IEnumerator LevelUpClose() {
-        Debug.Log("LevelUpClose()");
-        yield return new WaitForSeconds(1.0f);
         levelUpAnim.SetTrigger("Close");
+        yield return new WaitForSeconds(1.0f);
         LevelUp = GainedXP = false;
         CheckSpinAmt();
     }
@@ -437,7 +448,7 @@ public class RouletteManager : MonoBehaviour
     }
 
     public void SetSpins(int spins) {
-        selectedPlanets = new List<BonusPlanet>();
+        // selectedPlanets = new List<BonusPlanet>();
         bonusSpinBtn.interactable = false;
         spinAmount = spins;
         start.interactable = false;
@@ -481,6 +492,7 @@ public class RouletteManager : MonoBehaviour
         winTypeText.text =  amt.ToString() + " COINS";
         winPopUp.SetTrigger("Won");
 
+        winButtonHolder.SetActive(!doingBonusSpins);
 
 
         if(bonus) Invoke("Closewin", 1.5f);

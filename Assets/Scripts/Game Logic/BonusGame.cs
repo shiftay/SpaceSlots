@@ -11,28 +11,28 @@ public class BonusGame : MonoBehaviour
     RouletteManager rm;
     
     public void Setup(RouletteManager rm) {
-        this.rm = rm;
-        if(rm.selectedPlanets.Count > 0) {
-            ship.transform.localPosition = rm.selectedPlanets[rm.selectedPlanets.Count-1].checkmark.transform.localPosition;
-            ship.transform.eulerAngles = Vector3.zero;
-        }
+        // this.rm = rm;
+        // if(rm.selectedPlanets.Count > 0) {
+        //     ship.transform.localPosition = rm.selectedPlanets[rm.selectedPlanets.Count-1].checkmark.transform.localPosition;
+        //     ship.transform.eulerAngles = Vector3.zero;
+        // }
 
-        currentTier = rm.LEVEL / 2;
+        // currentTier = rm.LEVEL / 2;
 
-        bonusPlanets.ForEach(n => {
-            n.button.interactable = n.tier == currentTier;
+        // bonusPlanets.ForEach(n => {
+        //     n.button.interactable = n.tier == currentTier;
 
-            n.checkmark.SetActive(rm.selectedPlanets.Contains(n));
+        //     n.checkmark.SetActive(rm.selectedPlanets.Contains(n));
 
-            if(n.tier == currentTier) {
-                n.anim.SetTrigger("Flashing");
-            } else {
-                n.anim.SetTrigger("Default");
-            }
-        });
+        //     if(n.tier == currentTier) {
+        //         n.anim.SetTrigger("Flashing");
+        //     } else {
+        //         n.anim.SetTrigger("Default");
+        //     }
+        // });
 
-        currentMultiplierTxt.text = rm.bonus_CurrentMultiplier.ToString();
-        currentMultiplier.SetActive(rm.bonus_CurrentMultiplier > 1);     
+        // currentMultiplierTxt.text = rm.bonus_CurrentMultiplier.ToString();
+        // currentMultiplier.SetActive(rm.bonus_CurrentMultiplier > 1);     
 
         
     }
@@ -87,7 +87,7 @@ public class BonusGame : MonoBehaviour
         movingShip = true;
         startingPos = ship.transform.localPosition;
         
-        rm.selectedPlanets.Add(bonusPlanets.Find(n=> n.id == id));
+        // rm.selectedPlanets.Add(bonusPlanets.Find(n=> n.id == id));
         // Set Rewards
         close = true;
     }
