@@ -8,6 +8,7 @@ using TMPro;
 public class RouletteManager : MonoBehaviour
 {
     public GameObject winButtonHolder;
+    public InfoScreen infoScreen;
     public ExpBonusGlitter glitter;
     public Animator multiplierAnim;
     private const int EXPPERLEVEL = 20;
@@ -508,10 +509,9 @@ public class RouletteManager : MonoBehaviour
         float retVal = 0.0f;
 
         foreach(RouletteWin rw in win) {
-            retVal += IconMultipliers.summary.Find(n => n.checkSum == rw.checkSum).multiplier 
-                    * rw.WinMulti
-                    * currentData.currentBet
-                    * (doingBonusSpins ? bonus_CurrentMultiplier : 1);
+            retVal += IconMultipliers.summary.Find(n => n.id == rw.checkSum).multiplier * (doingBonusSpins ? bonus_CurrentMultiplier : 1)
+                    * currentData.currentBet;
+            // TODO: Place Line Denominations if we're having them.
         }
 
         return retVal;
@@ -528,6 +528,7 @@ public class RouletteManager : MonoBehaviour
 
 
     public void ShowInfo() {
+        infoScreen.Setup();
         canvasAnim.SetTrigger("Info");
     }
 
@@ -611,19 +612,19 @@ public class RouletteManager : MonoBehaviour
 
     public sealed class IconMultipliers {
         public int multiplier;
-        public int checkSum;
-        private IconMultipliers(int mp, int cSum) { multiplier = mp; checkSum = cSum; }
+        public int id;
+        private IconMultipliers(int mp, int cSum) { multiplier = mp; id = cSum; }
         public static IconMultipliers Sat = new IconMultipliers(2, 0);
-        public static IconMultipliers RedPlanet = new IconMultipliers(3, 1);
-        public static IconMultipliers Earth = new IconMultipliers(4, 2);
-        public static IconMultipliers GrnAlien = new IconMultipliers(5, 3);
-        public static IconMultipliers Android = new IconMultipliers(6, 4);
-        public static IconMultipliers SpaceGirl = new IconMultipliers(8, 5);
-        public static IconMultipliers GirlAlien = new IconMultipliers(10, 6);
-        public static IconMultipliers Captain = new IconMultipliers(15, 7);
-        public static IconMultipliers WildCard = new IconMultipliers(2, 8);
-        public static IconMultipliers BonusSpin = new IconMultipliers(2, 9);
-        public static IconMultipliers Exp = new IconMultipliers(2, 10);
+        public static IconMultipliers RedPlanet = new IconMultipliers(4, 1);
+        public static IconMultipliers Earth = new IconMultipliers(6, 2);
+        public static IconMultipliers GrnAlien = new IconMultipliers(10, 3);
+        public static IconMultipliers Android = new IconMultipliers(15, 4);
+        public static IconMultipliers SpaceGirl = new IconMultipliers(20, 5);
+        public static IconMultipliers GirlAlien = new IconMultipliers(25, 6);
+        public static IconMultipliers Captain = new IconMultipliers(40, 7);
+        public static IconMultipliers WildCard = new IconMultipliers(50, 8);
+        public static IconMultipliers BonusSpin = new IconMultipliers(50, 9);
+        public static IconMultipliers Exp = new IconMultipliers(1, 10);
         public static List<IconMultipliers> summary = new List<IconMultipliers>() { Sat, RedPlanet, Earth, GrnAlien, Android, SpaceGirl,
                                                                                     GirlAlien, Captain, WildCard, BonusSpin, Exp };
     }

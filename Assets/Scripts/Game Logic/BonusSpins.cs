@@ -9,11 +9,11 @@ public class BonusSpins : MonoBehaviour
 
     private const int NULL = -1;
     private List<BonusSpinInfo> spinInfos = new List<BonusSpinInfo>() { 
-        new BonusSpinInfo(0, 4, 1, 4, 100), 
-        new BonusSpinInfo(1, 6, 2, 5, 250),
-        new BonusSpinInfo(2, 8, 2, 6, 500),
-        new BonusSpinInfo(3, 10, 3, 7, 1000),
-        new BonusSpinInfo(4, 15, 3, 11, 2500),
+        new BonusSpinInfo(0, 4, 1, 4, 100, 15), 
+        new BonusSpinInfo(1, 6, 2, 5, 250, 25),
+        new BonusSpinInfo(2, 8, 2, 6, 500, 45),
+        new BonusSpinInfo(3, 10, 3, 7, 1000, 65),
+        new BonusSpinInfo(4, 15, 3, 11, 2500, 100),
     };
     private bool makingScreen;
     RouletteManager rm;
@@ -33,7 +33,6 @@ public class BonusSpins : MonoBehaviour
 
     public void Open(RouletteManager rm) {
         this.rm = rm;
-        currentBet = rm.currentData.currentBonusBet;
         anim.SetTrigger("Open");
     }
 
@@ -72,6 +71,7 @@ public class BonusSpins : MonoBehaviour
 
             anim.SetTrigger("Close");
             rm.currentData.coinAmount -= temp.price;
+            rm.currentData.currentBet = temp.betInfo;
             rm.SetCoinValue();
             rm.SetSpins(temp.baseSpin + Random.Range(temp.additionalMin, temp.additionalMax));
            
@@ -83,9 +83,9 @@ public class BonusSpins : MonoBehaviour
 
 
     private class BonusSpinInfo {
-        public int baseSpin, additionalMin, additionalMax, price, id;
-        public BonusSpinInfo(int id, int baseSpin, int min, int max, int price) {
-            this.id = id; this.baseSpin = baseSpin; additionalMin = min; additionalMax = max; this.price = price;
+        public int baseSpin, additionalMin, additionalMax, price, id, betInfo;
+        public BonusSpinInfo(int id, int baseSpin, int min, int max, int price, int betInfo) {
+            this.id = id; this.baseSpin = baseSpin; additionalMin = min; additionalMax = max; this.price = price; this.betInfo = betInfo;
         }
     }
 }
