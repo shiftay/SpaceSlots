@@ -43,7 +43,7 @@ public class Roulette : MonoBehaviour
         for(int i = 0; i < area_parent.childCount; i++) {
             currentItem = area_parent.GetChild(i);
 
-            currentChoice = rm.doingBonusSpins ? Randomizer.BonusRoll() : Randomizer.BasicRoll();
+            currentChoice =  rm.doingBonusSpins ? Randomizer.BonusRoll() : Randomizer.BasicRoll();
 
             currentItem.GetComponent<Image>().sprite = rm.potentialSprites[currentChoice];
 

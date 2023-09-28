@@ -29,7 +29,7 @@ public class InfoScreen : MonoBehaviour
 
 
     public void Back() {
-        currentPage++;
+        currentPage--;
         if(currentPage < 0) currentPage = pages.Count - 1;
 
         for(int i = 0; i < pages.Count; i++) pages[i].SetActive(currentPage == i);

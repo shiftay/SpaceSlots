@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -63,6 +62,8 @@ public class RouletteManager : MonoBehaviour
 
         doingBonusSpins = false;
 
+        infoScreen.Init(this);
+
         coinValue = currentData.coinAmount;
         SetBetValue();
         SetCoinValue();
@@ -99,14 +100,14 @@ public class RouletteManager : MonoBehaviour
                     if(doingBonusSpins) CheckSpinAmt();
                     else {
                         winLine.TurnOn(rWin[0].winId);
-                        start.interactable = true;
+                        ToggleButtonsSpin(true);
                     }
                    
                 } else {
                     // *** DEBUG MODE *** 
                     // To let constant spinning to see wins.
                     if(doingBonusSpins) CheckSpinAmt();
-                    else start.interactable = true;
+                    else ToggleButtonsSpin(true);
 
                     if(continuous) Spin();
                 }
@@ -133,6 +134,11 @@ public class RouletteManager : MonoBehaviour
         }
     }
 
+    public void ToggleButtonsSpin(bool interactable) {
+        start.interactable = interactable;
+        betGroup.interactable = interactable;
+    }
+
 
     public void ShowBonusGame() {
         // bonusGame.Setup(this);
@@ -147,7 +153,7 @@ public class RouletteManager : MonoBehaviour
             if(!GainedXP) Invoke("Spin", 1.75f);
         } else {
             doingBonusSpins = false;
-            start.interactable = true;
+            ToggleButtonsSpin(true);
 
             multiplierController.HideMultiplier();
             xpAnim.SetTrigger("FadeOut");
@@ -283,9 +289,8 @@ public class RouletteManager : MonoBehaviour
             }
         });
 
-        rWin = rWin.OrderByDescending(o=>o.winId).ToList();
         
-        // Debug.Log(rWin.Sort((x, y) => x.winId.CompareTo(y.winId))[0].winId);
+        //Debug.Log(rWin.Sort((x, y) => x.winId.CompareTo(y.winId))[0].winId);
     }
 
 
@@ -296,6 +301,7 @@ public class RouletteManager : MonoBehaviour
 #region UI
 
     public Button start, bonusSpinBtn;
+    public CanvasGroup betGroup;
     public TextMeshProUGUI betValue, winValue, coinAmount, expLevel, bonusSpinValue, levelupSpinInfo;
     public Image xpSlider;
 
@@ -342,7 +348,7 @@ public class RouletteManager : MonoBehaviour
 
         winLine.TurnOff();
         timeElapsed = timer = 0.0f;
-        start.interactable = false;
+        ToggleButtonsSpin(false);
         Won = false;
         fakeSpin.SetTrigger("Start");
         audioManager.PlaySFX(ClipIdentifier.SPIN);
@@ -420,7 +426,7 @@ public class RouletteManager : MonoBehaviour
             if(spinAmount > 0) Invoke("Spin", 2.5f);
             else {
                 doingBonusSpins = false;
-                start.interactable = true;
+                ToggleButtonsSpin(true);
 
                 xpAnim.SetTrigger("FadeOut");
                 bonusAnimator.SetTrigger("Close");
@@ -452,7 +458,7 @@ public class RouletteManager : MonoBehaviour
         // selectedPlanets = new List<BonusPlanet>();
         bonusSpinBtn.interactable = false;
         spinAmount = spins;
-        start.interactable = false;
+        ToggleButtonsSpin(false);
         SetSpinsVal();
         xpAnim.SetTrigger("FadeIn");
         bonusAnimator.SetTrigger("Open");
@@ -507,13 +513,11 @@ public class RouletteManager : MonoBehaviour
 
     private float winAmount(List<RouletteWin> win) {
         float retVal = 0.0f;
-
-        foreach(RouletteWin rw in win) {
-            retVal += IconMultipliers.summary.Find(n => n.id == rw.checkSum).multiplier * (doingBonusSpins ? bonus_CurrentMultiplier : 1)
-                    * currentData.currentBet;
+        
+        retVal  += IconMultipliers.summary.Find(n => n.id == win[0].checkSum).multiplier * (doingBonusSpins ? bonus_CurrentMultiplier : 1)
+                * currentData.currentBet;
             // TODO: Place Line Denominations if we're having them.
-        }
-
+        
         return retVal;
     } 
 
@@ -577,23 +581,6 @@ public class RouletteManager : MonoBehaviour
         public Coordinates(int x, int y) { Column = x; Row = y; }
 
         public Coordinates(int x, int y, int val) { Row = x; Column = y; Value = val; }
-    }
-
-    public sealed class TypeMultipliers {
-        public int multiplier;
-        public WINTYPE type;
-        private TypeMultipliers(int mp, WINTYPE tp) { multiplier = mp; type = tp; }
-        public static TypeMultipliers Hori = new TypeMultipliers(3, WINTYPE.HORIZONTAL);
-        public static TypeMultipliers Vert = new TypeMultipliers(5, WINTYPE.VERTICAL);
-        public static TypeMultipliers Diag = new TypeMultipliers(10, WINTYPE.DIAGONAL);
-        public static TypeMultipliers X = new TypeMultipliers(15, WINTYPE.X);
-        public static TypeMultipliers Cross = new TypeMultipliers(15, WINTYPE.CROSS);
-        public static TypeMultipliers T = new TypeMultipliers(10, WINTYPE.T);
-        public static TypeMultipliers T_Inv = new TypeMultipliers(10, WINTYPE.T_INVERTED);
-        public static TypeMultipliers L = new TypeMultipliers(10, WINTYPE.L);
-        public static TypeMultipliers L_Inv = new TypeMultipliers(10, WINTYPE.L_INVERTED);
-        public static TypeMultipliers Square = new TypeMultipliers(25, WINTYPE.SQUARE);
-        public static List<TypeMultipliers> summary = new List<TypeMultipliers>() { Hori, Vert, Diag, X, Cross, T, T_Inv, L, L_Inv, Square };
     }
 
     /*
